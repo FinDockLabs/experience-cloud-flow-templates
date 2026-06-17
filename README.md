@@ -12,4 +12,4 @@ This folder contains flow templates to get you started with building payment flo
 8. Add the flow to your Experience Cloud site.
 
 ## Deploy
-[![Deploy to Salesforce](https://app.jdeploy.cloud/images/flat.svg)](https://app.jdeploy.cloud/github/FinDockLabs/experience-cloud-templates/flow-templates/main)
+[![Deploy to Salesforce](https://app.jdeploy.cloud/images/flat.svg)](https://app.jdeploy.cloud/github/FinDockLabs/experience-cloud-flow-templates/main)
