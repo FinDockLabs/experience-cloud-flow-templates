@@ -133,6 +133,48 @@
             <name>amountAndFrequency</name>
             <extensionName>c:amountAndFrequency</extensionName>
             <fieldType>ComponentInstance</fieldType>
+            <inputParameters>
+                <name>showFrequencyToggle</name>
+                <value>
+                    <booleanValue>true</booleanValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>freq1Value</name>
+                <value>
+                    <stringValue>oneTime</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>freq2Value</name>
+                <value>
+                    <stringValue>recurring</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>presetAmountsOneTime</name>
+                <value>
+                    <stringValue>25,50,100,250,500,1000</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>presetAmountsRecurring</name>
+                <value>
+                    <stringValue>5,10,25,60,125,250</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>defaultCurrency</name>
+                <value>
+                    <stringValue>EUR</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>minAmount</name>
+                <value>
+                    <numberValue>1.0</numberValue>
+                </value>
+            </inputParameters>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>true</isRequired>
             <storeOutputAutomatically>true</storeOutputAutomatically>
@@ -331,41 +373,6 @@
             </styleProperties>
         </fields>
         <fields>
-            <name>progressStage3</name>
-            <extensionName>c:experienceProgressStages</extensionName>
-            <fieldType>ComponentInstance</fieldType>
-            <inputParameters>
-                <name>currentStage</name>
-                <value>
-                    <numberValue>3.0</numberValue>
-                </value>
-            </inputParameters>
-            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
-            <isRequired>true</isRequired>
-            <storeOutputAutomatically>true</storeOutputAutomatically>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
-            <name>paymentDetailsHeading</name>
-            <fieldText>&lt;h2&gt;Payment Details&lt;/h2&gt;</fieldText>
-            <fieldType>DisplayText</fieldType>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>12</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
             <name>Payment_Method_Selector</name>
             <extensionName>cpm:paymentMethodSelector</extensionName>
             <fieldType>ComponentInstance</fieldType>
@@ -440,7 +447,7 @@
             <inputParameters>
                 <name>currencyOneTime</name>
                 <value>
-                    <stringValue>EUR</stringValue>
+                    <elementReference>amountAndFrequency.selectedCurrency</elementReference>
                 </value>
             </inputParameters>
             <inputParameters>
@@ -452,7 +459,7 @@
             <inputParameters>
                 <name>currencyRecurring</name>
                 <value>
-                    <stringValue>EUR</stringValue>
+                    <elementReference>amountAndFrequency.selectedCurrency</elementReference>
                 </value>
             </inputParameters>
             <inputParameters>

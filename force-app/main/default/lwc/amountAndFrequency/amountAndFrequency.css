@@ -84,22 +84,129 @@
     transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 
-/* subtle hover tint, works on any theme, distinct from selected state */
+/* Subtle hover tint — works on any theme, distinct from selected state */
 .visually-hidden-input:not(:checked) + .toggle-option:hover,
 .visually-hidden-input:not(:checked) + .amount-option:hover {
     background-color: color-mix(in srgb, var(--dxp-g-brand, var(--slds-g-color-brand-base-60)) 8%, transparent);
 }
 
-/* Custom Amount Input */
-.custom-amount-input {
-    --slds-c-input-color-border: var(--dxp-s-form-element-color-border, var(--dxp-g-root-border-color, var(--slds-g-color-border-1)));
-    --slds-c-input-color-border-focus: var(--dxp-s-form-element-color-border-focus, var(--dxp-g-brand, var(--slds-g-color-brand-base-60)));
-    --slds-c-input-color-background: var(--dxp-s-form-element-color-background, var(--dxp-g-root-background-color, var(--slds-g-color-neutral-base-100)));
-    --slds-c-input-text-color: var(--dxp-s-form-element-text-color, var(--dxp-g-root-contrast-color, var(--slds-g-color-neutral-base-10)));
-    --slds-c-input-radius-border: var(--dxp-s-form-element-radius-border, var(--slds-g-radius-border-2));
+/* ─── Custom Amount Row ──────────────────────────────────────────────────── */
+
+.custom-amount-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--slds-g-spacing-1);
 }
 
-/* Visually hidden but still accessible to keyboard and screen readers */
+.custom-amount-row {
+    display: flex;
+    align-items: center;
+    height: var(--slds-g-sizing-10);
+    border: var(--dxp-s-form-element-width-border, var(--slds-g-sizing-border-2)) solid var(--dxp-s-form-element-color-border, var(--dxp-g-root-border-color, var(--slds-g-color-border-1)));
+    border-radius: var(--dxp-s-form-element-radius-border, var(--slds-g-radius-border-2));
+    background-color: var(--dxp-s-form-element-color-background, var(--dxp-g-root-background-color, var(--slds-g-color-neutral-base-100)));
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.custom-amount-row:focus-within {
+    border-color: var(--dxp-s-form-element-color-border-focus, var(--dxp-g-brand, var(--slds-g-color-brand-base-60)));
+    outline: none;
+}
+
+.currency-adornment {
+    flex-shrink: 0;
+    padding: 0 var(--slds-g-spacing-3);
+    font-family: var(--dxp-s-form-element-text-font-family, var(--slds-g-font-family-sans));
+    font-size: var(--dxp-s-form-element-text-font-size, var(--slds-g-font-scale-1));
+    color: var(--dxp-s-form-element-text-color, var(--dxp-g-root-contrast-color, var(--slds-g-color-neutral-base-30)));
+    user-select: none;
+}
+
+.currency-adornment-suffix {
+    border-left: var(--slds-g-sizing-border-1) solid var(--dxp-s-form-element-color-border, var(--slds-g-color-border-1));
+}
+
+.custom-amount-input-native {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0 var(--slds-g-spacing-3);
+    font-family: var(--dxp-s-form-element-text-font-family, var(--slds-g-font-family-sans));
+    font-size: var(--dxp-s-form-element-text-font-size, var(--slds-g-font-scale-1));
+    color: var(--dxp-s-form-element-text-color, var(--dxp-g-root-contrast-color, var(--slds-g-color-neutral-base-10)));
+    outline: none;
+    /* Remove native number spinners — they clash with the currency adornments */
+    -moz-appearance: textfield;
+}
+
+.custom-amount-input-native::-webkit-outer-spin-button,
+.custom-amount-input-native::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.custom-amount-input-native::placeholder {
+    color: var(--dxp-s-form-element-text-color, var(--slds-g-color-neutral-base-50));
+    opacity: 1;
+}
+
+/* Currency selector dropdown */
+.currency-select {
+    flex-shrink: 0;
+    height: 100%;
+    border: 0;
+    border-left: var(--slds-g-sizing-border-1) solid var(--dxp-s-form-element-color-border, var(--slds-g-color-border-1));
+    border-radius: 0;
+    background: transparent;
+    padding: 0 var(--slds-g-spacing-2) 0 var(--slds-g-spacing-3);
+    font-family: var(--dxp-s-form-element-text-font-family, var(--slds-g-font-family-sans));
+    font-size: var(--dxp-s-form-element-text-font-size, var(--slds-g-font-scale-1));
+    color: var(--dxp-s-form-element-text-color, var(--dxp-g-root-contrast-color, var(--slds-g-color-neutral-base-10)));
+    cursor: pointer;
+    appearance: auto;
+}
+
+.currency-select:focus-visible {
+    outline: 2px solid var(--dxp-g-brand, var(--slds-g-color-brand-base-60));
+    outline-offset: -2px;
+}
+
+/* Static currency code when only one currency is available */
+.currency-code-static {
+    flex-shrink: 0;
+    padding: 0 var(--slds-g-spacing-3);
+    border-left: var(--slds-g-sizing-border-1) solid var(--dxp-s-form-element-color-border, var(--slds-g-color-border-1));
+    font-family: var(--dxp-s-form-element-text-font-family, var(--slds-g-font-family-sans));
+    font-size: var(--dxp-s-form-element-text-font-size, var(--slds-g-font-scale-1));
+    color: var(--dxp-s-form-element-text-color, var(--dxp-g-root-contrast-color, var(--slds-g-color-neutral-base-30)));
+    user-select: none;
+}
+
+/* Validation error */
+.amount-error {
+    margin: 0;
+    padding: 0;
+    font-family: var(--dxp-s-form-element-text-font-family, var(--slds-g-font-family-sans));
+    font-size: var(--slds-g-font-scale-neg-1);
+    color: var(--slds-g-color-error-base-50);
+}
+
+/* ─── Impact Narrative ────────────────────────────────────────────────────── */
+
+.impact-narrative {
+    margin: 0;
+    padding: var(--slds-g-spacing-2) var(--slds-g-spacing-3);
+    border-left: 3px solid var(--dxp-g-brand, var(--slds-g-color-brand-base-60));
+    font-family: var(--dxp-s-form-element-text-font-family, var(--slds-g-font-family-sans));
+    font-size: var(--slds-g-font-scale-neg-1);
+    color: var(--dxp-s-form-element-text-color, var(--dxp-g-root-contrast-color, var(--slds-g-color-neutral-base-30)));
+}
+
+/* ─── Visually hidden but keyboard/screen-reader accessible ─────────────── */
+
 .visually-hidden-input {
     position: absolute;
     width: 1px;
@@ -113,20 +220,20 @@
     white-space: nowrap;
 }
 
-/* Selected state (toggle): inset ring via box-shadow — no layout shift, avoids a second border */
+/* Selected state (toggle): inset ring via box-shadow — no layout shift */
 .visually-hidden-input:checked + .toggle-option {
     background-color: var(--dxp-s-form-element-color-background, var(--dxp-g-root-background-color, var(--slds-g-color-neutral-base-100)));
     color: var(--dxp-s-form-element-text-color, var(--dxp-g-root-contrast-color, var(--slds-g-color-neutral-base-10)));
     box-shadow: inset 0 0 0 2px var(--dxp-g-brand, var(--slds-g-color-brand-base-60));
 }
 
-/* Selected state (preset amount): inset brand ring, text color unchanged (consistent with toggle) */
+/* Selected state (preset amount) */
 .visually-hidden-input:checked + .amount-option {
     background-color: var(--dxp-s-form-element-color-background-active, var(--dxp-s-form-element-color-background, var(--slds-g-color-neutral-base-100)));
     box-shadow: inset 0 0 0 2px var(--dxp-g-brand, var(--slds-g-color-brand-base-60));
 }
 
-/* Visible keyboard focus (WCAG 2.4.7 AA) drawn on the label as an outline */
+/* Visible keyboard focus (WCAG 2.4.7 AA) drawn on the label */
 .visually-hidden-input:focus-visible + .toggle-option,
 .visually-hidden-input:focus-visible + .amount-option {
     outline: 2px solid var(--dxp-g-brand, var(--slds-g-color-brand-base-60));

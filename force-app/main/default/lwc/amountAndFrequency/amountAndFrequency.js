@@ -2,114 +2,416 @@ import { LightningElement, api } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
 import { labels } from './amountAndFrequencyLabels';
 
-const DEFAULT_PRESET_AMOUNTS_ONE_TIME = [25, 50, 100, 250, 500, 1000];
-const DEFAULT_PRESET_AMOUNTS_RECURRING = [5, 10, 25, 60, 125, 250];
-// Module-level counter ensures unique DOM IDs/radio names when multiple instances render on the same page.
+const DEFAULT_AMOUNTS_ONE_TIME  = '25,50,100,250,500,1000';
+const DEFAULT_AMOUNTS_RECURRING = '5,10,25,60,125,250';
+const DEFAULT_FREQ_1_VALUE      = 'oneTime';
+const DEFAULT_FREQ_2_VALUE      = 'recurring';
+// Module-level counter ensures unique DOM IDs when multiple instances are on the same page.
 let _nextInstanceId = 0;
 
 export default class AmountAndFrequency extends LightningElement {
     _instanceId = ++_nextInstanceId;
-    _presetAmounts = null;
-    _frequency = 'oneTime';
+    _frequency = DEFAULT_FREQ_1_VALUE;
     _selectedPreset = null;
     _customAmount = '';
+    _selectedCurrency = '';
+    _validationError = '';
 
     labels = labels;
 
+    // ─── Frequency configuration ─────────────────────────────────────────────
+
+    @api freq1Value = DEFAULT_FREQ_1_VALUE;
+    @api freq1Label = '';
+    @api freq2Value = DEFAULT_FREQ_2_VALUE;
+    @api freq2Label = '';
+    @api showFrequencyToggle = false;
+
+    @api presetAmountsOneTime  = DEFAULT_AMOUNTS_ONE_TIME;
+    @api presetAmountsRecurring = DEFAULT_AMOUNTS_RECURRING;
+    @api impactNarrativesOneTime  = '';
+    @api impactNarrativesRecurring = '';
+
+    @api minAmount = 1;
+    @api maxAmount = null;
+
+    // ─── Currency ─────────────────────────────────────────────────────────────
+
+    @api availableCurrencies = '';
+    @api defaultCurrency = 'USD';
+    /** Pre-selects a frequency when the component first renders, e.g. 'recurring'. */
+    @api defaultFrequency = '';
+
+    // ─── Flow output: frequency ───────────────────────────────────────────────
     @api
     get frequency() {
         return this._frequency;
     }
     set frequency(value) {
-        this._frequency = value || 'oneTime';
+        this._frequency = value || DEFAULT_FREQ_1_VALUE;
     }
 
     @api
-    get presetAmounts() {
-        if (this._presetAmounts) {
-            return this._presetAmounts;
+    get amount() {
+        if (this._customAmount !== '') {
+            const n = Number(this._customAmount);
+            return isNaN(n) ? null : n;
         }
-        return this._frequency === 'recurring'
-            ? DEFAULT_PRESET_AMOUNTS_RECURRING
-            : DEFAULT_PRESET_AMOUNTS_ONE_TIME;
-    }
-    set presetAmounts(value) {
-        this._presetAmounts = Array.isArray(value) ? value : DEFAULT_PRESET_AMOUNTS_ONE_TIME;
+        return this._selectedPreset;
     }
 
     @api
     get amountOneTime() {
         if (this._frequency !== 'oneTime') return null;
-        if (this._customAmount !== '') return Number(this._customAmount);
-        return this._selectedPreset;
+        return this.amount;
     }
 
     @api
     get amountRecurring() {
         if (this._frequency !== 'recurring') return null;
-        if (this._customAmount !== '') return Number(this._customAmount);
-        return this._selectedPreset;
+        return this.amount;
     }
 
-    get frequencyGroupName(){
+    @api
+    get selectedCurrency() {
+        return this._selectedCurrency;
+    }
+
+    // ─── Internal helpers ─────────────────────────────────────────────────────
+    get _locale() {
+        try {
+            return navigator.language || 'en-US';
+        } catch {
+            return 'en-US';
+        }
+    }
+
+    get _symbolInfo() {
+        return this.getCurrencySymbolInfo(this._selectedCurrency, this._locale);
+    }
+
+    // ─── Template getters ─────────────────────────────────────────────────────
+    get frequencyGroupName() {
         return `frequency-${this._instanceId}`;
     }
 
     get presetName() {
-        return `presetAmount-${this._instanceId}`;
+        return `preset-${this._instanceId}`;
     }
 
     get frequencyOnceId() {
-        return `freq-once-${this._instanceId}`;
+        return `freq-1-${this._instanceId}`;
     }
 
     get frequencyMonthlyId() {
-        return `freq-monthly-${this._instanceId}`;
+        return `freq-2-${this._instanceId}`;
     }
 
-    get isGiveOnce() {
-        return this._frequency === 'oneTime';
+    get customAmountId() {
+        return `custom-amount-${this._instanceId}`;
     }
 
-    get isMonthly() {
-        return this._frequency === 'recurring';
+    get customAmountErrorId() {
+        return `custom-amount-error-${this._instanceId}`;
+    }
+
+    get displayFreq1Label() {
+        return this.freq1Label || this.labels.ec_label_give_once;
+    }
+
+    get displayFreq2Label() {
+        return this.freq2Label || this.labels.ec_label_monthly;
+    }
+
+    get isFreq1Selected() {
+        return this._frequency === this.freq1Value;
+    }
+
+    get isFreq2Selected() {
+        return this._frequency === this.freq2Value;
+    }
+
+    get showMonthlyIcon() {
+        return this.freq2Value === DEFAULT_FREQ_2_VALUE;
+    }
+
+    get showPresets() {
+        const p = this._resolveActivePresets();
+        return p !== null && p.length > 0;
     }
 
     get presetAmountOptions() {
-        return this.presetAmounts.map(amount => {
-            const isSelected = this._selectedPreset === amount && this._customAmount === '';
-            return {
-                value: amount,
-                label: `$${amount.toLocaleString()}`,
-                inputId: `${this._instanceId}-preset-${amount}`,
-                isSelected
-            };
-        });
+        const presets    = this._resolveActivePresets() || [];
+        const narratives = this._resolveActiveNarratives();
+        return presets.map((amount, idx) => ({
+            value: amount,
+            label: this.formatPresetAmount(amount, this._selectedCurrency, this._locale),
+            inputId: `${this._instanceId}-preset-${amount}`,
+            narrative: narratives[idx] || '',
+            isSelected: this._selectedPreset === amount && this._customAmount === ''
+        }));
     }
+
+    get selectedPresetNarrative() {
+        if (this._customAmount !== '' || this._selectedPreset === null) return '';
+        const opt = this.presetAmountOptions.find(o => o.isSelected);
+        return opt ? opt.narrative : '';
+    }
+
+    get currencyOptions() {
+        const currencies = this.parseCurrencies(this.availableCurrencies);
+        const list       = currencies.length > 0 ? currencies : [this._selectedCurrency];
+        return list.map(c => ({ value: c, label: c, isSelected: c === this._selectedCurrency }));
+    }
+
+    get showCurrencySelector() {
+        return this.currencyOptions.length > 1;
+    }
+
+    get currencySymbol() {
+        return this._symbolInfo.symbol;
+    }
+
+    get isCurrencyPrefix() {
+        return this._symbolInfo.position === 'prefix';
+    }
+
+    get isCurrencySuffix() {
+        return this._symbolInfo.position === 'suffix';
+    }
+
+    get singleCurrencyCode() {
+        return this._selectedCurrency;
+    }
+
+    get customAmountMin() {
+        return Number(this.minAmount) || 1;
+    }
+
+    get customAmountMax() {
+        const n = Number(this.maxAmount);
+        return n > 0 ? n : null;
+    }
+
+    get validationError() {
+        return this._validationError;
+    }
+
+    get hasValidationError() {
+        return !!this._validationError;
+    }
+
+    // ─── Lifecycle ────────────────────────────────────────────────────────────
+    connectedCallback() {
+        this._selectedCurrency = this.defaultCurrency || 'USD';
+        if (this.defaultFrequency) {
+            this._frequency = this.defaultFrequency;
+        }
+        // Restore user's full selection on back-navigation.
+        // sessionStorage overrides defaults above; URL params override sessionStorage.
+        this._restoreState();
+        this._applyQueryParams();
+    }
+
+    disconnectedCallback() {
+        // Persist selection so it survives Flow back-navigation (component remount).
+        this._saveState();
+    }
+
+    _storageKey() {
+        try {
+            return `af-state-${window.location.pathname}`;
+        } catch {
+            return 'af-state';
+        }
+    }
+
+    _saveState() {
+        try {
+            sessionStorage.setItem(this._storageKey(), JSON.stringify({
+                frequency:        this._frequency,
+                selectedPreset:   this._selectedPreset,
+                customAmount:     this._customAmount,
+                selectedCurrency: this._selectedCurrency
+            }));
+        } catch { /* sessionStorage unavailable */ }
+    }
+
+    _restoreState() {
+        try {
+            const raw = sessionStorage.getItem(this._storageKey());
+            if (!raw) return;
+            const s = JSON.parse(raw);
+            if (s.frequency)                     this._frequency        = s.frequency;
+            if (s.selectedPreset !== undefined)  this._selectedPreset   = s.selectedPreset;
+            if (s.customAmount   !== undefined)  this._customAmount     = s.customAmount;
+            if (s.selectedCurrency)              this._selectedCurrency = s.selectedCurrency;
+        } catch { /* ignore parse errors */ }
+    }
+
+    _applyQueryParams() {
+        try {
+            const params     = new URLSearchParams(window.location.search);
+            const qAmount    = params.get('amount');
+            const qFrequency = params.get('frequency');
+            const qCurrency  = params.get('currency');
+
+            if (qFrequency) this._frequency = qFrequency;
+            if (qCurrency)  this._selectedCurrency = qCurrency.toUpperCase();
+
+            if (qAmount) {
+                const num    = Number(qAmount);
+                const presets = this._resolveActivePresets();
+                if (!isNaN(num) && num > 0) {
+                    if (presets && presets.includes(num)) {
+                        this._selectedPreset = num;
+                    } else {
+                        this._customAmount = String(num);
+                    }
+                }
+            }
+        } catch {
+            // window.location is unavailable in SSR / test environments — skip silently.
+        }
+    }
+
+    // ─── Event handlers ───────────────────────────────────────────────────────
 
     handleFrequencyChange(event) {
         this._frequency = event.target.value;
-        this.dispatchChange();
+        this._selectedPreset  = null;
+        this._customAmount    = '';
+        this._validationError = '';
+        this._dispatchChange();
     }
 
     handlePresetAmountSelect(event) {
         this._selectedPreset = Number(event.target.value);
         this._customAmount = '';
-        this.dispatchChange();
+        this._validationError = '';
+        this._dispatchChange();
     }
 
-    handleCustomAmountChange(event) {
-        const val = event.detail.value;
+    handleCustomAmountInput(event) {
+        const val = event.target.value;
         this._customAmount = val;
-        if (val !== '') {
-            this._selectedPreset = null;
-        }
-        this.dispatchChange();
+        this._selectedPreset  = val !== '' ? null : this._selectedPreset;
+        this._validateAmount(Number(val));
+        this._dispatchChange();
     }
 
-    dispatchChange() {
-        this.dispatchEvent(new FlowAttributeChangeEvent('amountOneTime', this.amountOneTime));
-        this.dispatchEvent(new FlowAttributeChangeEvent('amountRecurring', this.amountRecurring));
-        this.dispatchEvent(new FlowAttributeChangeEvent('frequency', this._frequency));
+    handleCurrencyChange(event) {
+        this._selectedCurrency = event.target.value;
+        this._dispatchChange();
+    }
+
+    _validateAmount(num) {
+        if (this._customAmount === '') {
+            this._validationError = '';
+            return;
+        }
+        const min = this.customAmountMin;
+        const max = this.customAmountMax;
+        if (isNaN(num) || num < min) {
+            this._validationError = this.labels.ec_label_amount_min_error.replace(
+                '{0}',
+                this.formatPresetAmount(min, this._selectedCurrency, this._locale)
+            );
+        } else if (max !== null && num > max) {
+            this._validationError = this.labels.ec_label_amount_max_error.replace(
+                '{0}',
+                this.formatPresetAmount(max, this._selectedCurrency, this._locale)
+            );
+        } else {
+            this._validationError = '';
+        }
+    }
+
+    _dispatchChange() {
+        const detail = {
+            frequency:        this._frequency,
+            amount:           this.amount,
+            amountOneTime:    this.amountOneTime,
+            amountRecurring:  this.amountRecurring,
+            selectedCurrency: this._selectedCurrency
+        };
+
+        // Parent LWC components listen with onamountfrequencychange={handler}.
+        this.dispatchEvent(new CustomEvent('amountfrequencychange', { detail }));
+
+        // Flow attribute change events are no-ops when not inside a Flow screen.
+        this.dispatchEvent(new FlowAttributeChangeEvent('frequency', detail.frequency));
+        this.dispatchEvent(new FlowAttributeChangeEvent('amount', detail.amount));
+        this.dispatchEvent(new FlowAttributeChangeEvent('amountOneTime', detail.amountOneTime));
+        this.dispatchEvent(new FlowAttributeChangeEvent('amountRecurring', detail.amountRecurring));
+        this.dispatchEvent(new FlowAttributeChangeEvent('selectedCurrency', detail.selectedCurrency));
+    }
+
+    parseAmounts(raw) {
+        if (!raw || !String(raw).trim()) return null;
+        const parsed = String(raw)
+            .split(',')
+            .map(s => Number(s.trim()))
+            .filter(n => !isNaN(n) && n > 0);
+        return parsed.length > 0 ? parsed : null;
+    }
+
+    parseNarratives(raw) {
+        if (!raw || !String(raw).trim()) return [];
+        return String(raw).split(';').map(s => s.trim());
+    }
+
+    parseCurrencies(raw) {
+        if (!raw || !String(raw).trim()) return [];
+        return String(raw)
+            .split(',')
+            .map(s => s.trim().toUpperCase())
+            .filter(Boolean);
+    }
+
+    _resolveActivePresets() {
+        const raw = this._frequency === this.freq2Value
+            ? this.presetAmountsRecurring
+            : this.presetAmountsOneTime;
+        return this.parseAmounts(raw);
+    }
+
+    _resolveActiveNarratives() {
+        const raw = this._frequency === this.freq2Value
+            ? this.impactNarrativesRecurring
+            : this.impactNarrativesOneTime;
+        return this.parseNarratives(raw);
+    }
+
+    // Returns the currency symbol and whether it is a prefix or suffix for the given locale.
+    getCurrencySymbolInfo(currencyCode, locale) {
+        try {
+            const parts = new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency: currencyCode,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).formatToParts(0);
+            const currencyIdx = parts.findIndex(p => p.type === 'currency');
+            const integerIdx = parts.findIndex(p => p.type === 'integer');
+            const symbol = parts[currencyIdx] ? parts[currencyIdx].value : currencyCode;
+            const position = currencyIdx < integerIdx ? 'prefix' : 'suffix';
+            return {symbol, position};
+        } catch {
+            return {symbol: currencyCode, position: 'prefix'};
+        }
+    }
+
+    formatPresetAmount(amount, currencyCode, locale) {
+        try {
+            return new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency: currencyCode,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        } catch {
+            return `${currencyCode} ${amount}`;
+        }
     }
 }

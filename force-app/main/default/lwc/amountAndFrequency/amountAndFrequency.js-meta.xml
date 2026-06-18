@@ -8,10 +8,30 @@
         <target>lightning__FlowScreen</target>
     </targets>
     <targetConfigs>
-        <targetConfig targets="lightning__FlowScreen">
-            <property name="frequency" type="String" label="Frequency" description="Donation frequency: 'oneTime' or 'recurring'" role="outputOnly"/>
-            <property name="amountOneTime" type="Integer" label="One-Time Amount" description="The selected or entered amount when frequency is one-time; null when recurring" role="outputOnly"/>
-            <property name="amountRecurring" type="Integer" label="Recurring Amount" description="The selected or entered amount when frequency is recurring; null when one-time" role="outputOnly"/>
+        <targetConfig targets="lightning__FlowScreen" configurationEditor="c-amount-and-frequency-config">
+
+            <property name="freq1Value"          type="String"  role="inputOnly" label="Frequency 1 — API value"      description="API value for the first frequency option."                                                        default="oneTime"/>
+            <property name="freq1Label"          type="String"  role="inputOnly" label="Frequency 1 — Display label"  description="Button label. Leave blank to use the default Custom Label (Give once)."                                            />
+            <property name="freq2Value"          type="String"  role="inputOnly" label="Frequency 2 — API value"      description="API value for the second frequency option."                                                       default="recurring"          />
+            <property name="freq2Label"          type="String"  role="inputOnly" label="Frequency 2 — Display label"  description="Button label. Leave blank to use the default Custom Label (Monthly)."                                              />
+            <property name="showFrequencyToggle" type="Boolean" role="inputOnly" label="Show frequency toggle"         description="Uncheck to hide the toggle and always submit frequency 1."                                       default="false"              />
+
+            <property name="presetAmountsOneTime"      type="String"  role="inputOnly" label="Preset amounts — one-time (comma-separated)"          description="Up to 6 comma-separated numbers, e.g. 25,50,100,250,500,1000. Leave blank to hide the preset grid."  default="25,50,100,250,500,1000"  />
+            <property name="presetAmountsRecurring"    type="String"  role="inputOnly" label="Preset amounts — recurring (comma-separated)"         description="Up to 6 comma-separated numbers for the recurring frequency. Leave blank to hide the preset grid."   default="5,10,25,60,125,250"      />
+            <property name="impactNarrativesOneTime"   type="String"  role="inputOnly" label="Impact narratives — one-time (semicolon-separated)"   description="Semicolons separate narratives per preset, e.g. 'Feed a family;Build a school'. Shown when a preset is selected."              />
+            <property name="impactNarrativesRecurring" type="String"  role="inputOnly" label="Impact narratives — recurring (semicolon-separated)"  description="Narratives aligned by index to the recurring preset amounts."                                                                   />
+            <property name="minAmount"                 type="Integer" role="inputOnly" label="Minimum amount"                                        description="Minimum accepted value in the custom amount field."                                   default="1"               />
+            <property name="maxAmount"                 type="Integer" role="inputOnly" label="Maximum amount (0 = none)"                             description="Maximum accepted value. Set to 0 for no limit."                                      default="0"               />
+
+            <property name="availableCurrencies" type="String" role="inputOnly" label="Available currencies (comma-separated ISO codes)"  description="e.g. USD,EUR,GBP. Leave blank for single-currency mode (no selector shown)."  />
+            <property name="defaultCurrency"     type="String" role="inputOnly" label="Default currency code"                             description="ISO 4217 code pre-selected on load, e.g. USD."  default="USD"                 />
+            <property name="defaultFrequency"    type="String" role="inputOnly" label="Default frequency"                                 description="Frequency pre-selected when the component loads, e.g. oneTime or recurring."      />
+
+            <property name="frequency"        type="String"  role="outputOnly" label="Frequency"          description="API value of the selected frequency (matches freq1Value or freq2Value)."/>
+            <property name="amount"           type="Integer" role="outputOnly" label="Amount"             description="Selected or entered amount (supports decimals, e.g. 10.50). Matches cpm:payButton input type."/>
+            <property name="amountOneTime"    type="Integer" role="outputOnly" label="Amount — one-time"  description="Amount when frequency is one-time; null otherwise. Prefer Amount."/>
+            <property name="amountRecurring"  type="Integer" role="outputOnly" label="Amount — recurring" description="Amount when frequency is recurring; null otherwise. Prefer Amount."/>
+            <property name="selectedCurrency" type="String"  role="outputOnly" label="Selected currency"  description="ISO 4217 code of the currency the donor has chosen."/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

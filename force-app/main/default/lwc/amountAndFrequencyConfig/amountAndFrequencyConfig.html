@@ -1,0 +1,150 @@
+<template>
+    <div class="cpe-root">
+        <!-- ── Frequency ──────────────────────────────────────────────────────── -->
+        <section class="cpe-section">
+            <h3 class="section-heading">Frequency</h3>
+            <p class="section-desc">Toggle which frequencies appear.</p>
+            <div class="chip-group" role="group" aria-label="Frequency options">
+                <button type="button" class={oneTimeChipClass} onclick={handleShowOneTimeChange}>One-time</button>
+                <button type="button" class={monthlyChipClass} onclick={handleShowMonthlyChange}>Monthly</button>
+            </div>
+            <template lwc:if={frequencyError}>
+                <p class="field-error">{frequencyError}</p>
+            </template>
+            <template lwc:if={showDefaultFrequency}>
+                <lightning-combobox
+                    label="Default frequency"
+                    value={defaultFrequency}
+                    options={frequencyOptions}
+                    onchange={handleDefaultFrequencyChange}
+                ></lightning-combobox>
+            </template>
+        </section>
+
+        <hr class="section-rule" />
+
+        <!-- ── Preset Amounts ──────────────────────────────────────────────────── -->
+        <section class="cpe-section">
+            <h3 class="section-heading">Preset amounts</h3>
+
+            <template lwc:if={showOneTime}>
+                <template lwc:if={showBothFrequencies}>
+                    <p class="subsection-label">One-time</p>
+                </template>
+                <div class="amounts-grid">
+                    <template for:each={presetsOneTime} for:item="preset">
+                        <div key={preset.key} class="amount-cell">
+                            <span class="amount-symbol" aria-hidden="true">$</span>
+                            <input
+                                type="number"
+                                class="amount-native-input"
+                                aria-label={preset.label}
+                                placeholder="0"
+                                value={preset.amount}
+                                min="0"
+                                step="any"
+                                data-index={preset.index}
+                                oninput={handlePresetOTAmountChange}
+                            />
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <template lwc:if={showMonthly}>
+                <template lwc:if={showBothFrequencies}>
+                    <p class="subsection-label">Monthly</p>
+                </template>
+                <div class="amounts-grid">
+                    <template for:each={presetsRecurring} for:item="preset">
+                        <div key={preset.key} class="amount-cell">
+                            <span class="amount-symbol" aria-hidden="true">$</span>
+                            <input
+                                type="number"
+                                class="amount-native-input"
+                                aria-label={preset.label}
+                                placeholder="0"
+                                value={preset.amount}
+                                min="0"
+                                step="any"
+                                data-index={preset.index}
+                                oninput={handlePresetRecAmountChange}
+                            />
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+        </section>
+
+        <hr class="section-rule" />
+
+        <!-- ── Other Amount ────────────────────────────────────────────────────── -->
+        <section class="cpe-section">
+            <h3 class="section-heading">Other amount</h3>
+            <div class="limit-row">
+                <div class="limit-field">
+                    <span class="native-label">Minimum</span>
+                    <div class="amount-cell">
+                        <span class="amount-symbol" aria-hidden="true">$</span>
+                        <input
+                            type="number"
+                            class="amount-native-input"
+                            aria-label="Minimum amount"
+                            value={minAmount}
+                            min="0"
+                            step="1"
+                            oninput={handleMinAmountChange}
+                        />
+                    </div>
+                </div>
+                <div class="limit-field">
+                    <span class="native-label">Maximum</span>
+                    <div class="amount-cell">
+                        <span class="amount-symbol" aria-hidden="true">$</span>
+                        <input
+                            type="number"
+                            class="amount-native-input"
+                            aria-label="Maximum amount"
+                            placeholder="No limit"
+                            value={maxAmount}
+                            min="0"
+                            step="1"
+                            oninput={handleMaxAmountChange}
+                        />
+                    </div>
+                </div>
+            </div>
+            <template lwc:if={minMaxError}>
+                <p class="field-error">{minMaxError}</p>
+            </template>
+        </section>
+
+        <hr class="section-rule" />
+
+        <!-- ── Currency ────────────────────────────────────────────────────────── -->
+        <section class="cpe-section">
+            <h3 class="section-heading">Currency</h3>
+            <div class="chip-group" role="group" aria-label="Available currencies">
+                <template for:each={currencyList} for:item="currency">
+                    <button
+                        key={currency.code}
+                        type="button"
+                        class={currency.chipClass}
+                        data-code={currency.code}
+                        onclick={handleCurrencyToggle}
+                    >{currency.code}</button>
+                </template>
+            </div>
+            <template lwc:if={currencyError}>
+                <p class="field-error">{currencyError}</p>
+            </template>
+            <lightning-combobox
+                label="Default currency"
+                value={defaultCurrency}
+                options={defaultCurrencyOptions}
+                onchange={handleDefaultCurrencyChange}
+            ></lightning-combobox>
+        </section>
+    </div>
+</template>
