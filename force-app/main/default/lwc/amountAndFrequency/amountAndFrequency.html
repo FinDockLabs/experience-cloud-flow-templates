@@ -27,14 +27,12 @@
                     onchange={handleFrequencyChange}
                 />
                 <label for={frequencyMonthlyId} class="toggle-option toggle-option-secondary">
-                    <template lwc:if={showMonthlyIcon}>
-                        <lightning-icon
-                            icon-name="utility:heart"
-                            size="x-small"
-                            class="monthly-icon"
-                            aria-hidden="true"
-                        ></lightning-icon>
-                    </template>
+                    <lightning-icon
+                        icon-name="utility:heart"
+                        size="x-small"
+                        class="monthly-icon"
+                        aria-hidden="true"
+                    ></lightning-icon>
                     {labels.ec_label_monthly}
                 </label>
             </fieldset>

@@ -125,10 +125,6 @@ export default class AmountAndFrequency extends LightningElement {
         return this._frequency === this.freq2Value;
     }
 
-    get showMonthlyIcon() {
-        return this.freq2Value === DEFAULT_FREQ_2_VALUE;
-    }
-
     get showPresets() {
         const p = this._resolveActivePresets();
         return p !== null && p.length > 0;
