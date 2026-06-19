@@ -23,16 +23,14 @@
             <property name="minAmount"                 type="Integer" role="inputOnly" label="Minimum amount"                                        description="Minimum accepted value in the custom amount field."                                   default="1"               />
             <property name="maxAmount"                 type="Integer" role="inputOnly" label="Maximum amount (0 = none)"                             description="Maximum accepted value. Set to 0 for no limit."                                      default="0"               />
 
-            <property name="availableCurrencies" type="String" role="inputOnly" label="Available currencies (comma-separated ISO codes)"  description="e.g. USD,EUR,GBP. Leave blank for single-currency mode (no selector shown)."  />
-            <property name="defaultCurrency"     type="String" role="inputOnly" label="Default currency code"                             description="ISO 4217 code pre-selected on load, e.g. EUR. Leave blank to auto-select the first available currency."  default="USD"  />
-            <property name="currencySource"      type="String" role="inputOnly" label="Currency source"                                  description="config = CPE list; user = running user currency (Apex); flow = bind defaultCurrency to a Flow variable."  default="config"  />
+            <property name="defaultCurrency" type="String" role="inputOnly" label="Default currency code" description="ISO 4217 code passed in from the Currency Picker component, e.g. EUR." />
             <property name="defaultFrequency"    type="String" role="inputOnly" label="Default frequency"                                 description="Frequency pre-selected when the component loads, e.g. oneTime or recurring."      />
 
-            <property name="frequency"        type="String"  role="outputOnly" label="Frequency"          description="API value of the selected frequency (matches freq1Value or freq2Value)."/>
-            <property name="amount"           type="Integer" role="outputOnly" label="Amount"             description="Selected or entered amount (supports decimals, e.g. 10.50). Matches cpm:payButton input type."/>
-            <property name="amountOneTime"    type="Integer" role="outputOnly" label="Amount — one-time"  description="Amount when frequency is one-time; null otherwise. Prefer Amount."/>
-            <property name="amountRecurring"  type="Integer" role="outputOnly" label="Amount — recurring" description="Amount when frequency is recurring; null otherwise. Prefer Amount."/>
-            <property name="selectedCurrency" type="String"  role="outputOnly" label="Selected currency"  description="ISO 4217 code of the currency the donor has chosen."/>
+            <property name="frequency"        type="String"  label="Frequency"          description="API value of the selected frequency (matches freq1Value or freq2Value)."/>
+            <property name="amount"           type="Integer" label="Amount"             description="Selected or entered amount (supports decimals, e.g. 10.50). Matches cpm:payButton input type."/>
+            <property name="amountOneTime"    type="Integer" label="Amount — one-time"  description="Amount when frequency is one-time; null otherwise. Prefer Amount."/>
+            <property name="amountRecurring"  type="Integer" label="Amount — recurring" description="Amount when frequency is recurring; null otherwise. Prefer Amount."/>
+            <property name="selectedCurrency" type="String"  label="Selected currency"  description="ISO 4217 code of the currency chosen on the form."/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

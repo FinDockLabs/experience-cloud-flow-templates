@@ -1,13 +1,6 @@
 <template>
     <div class="amount-frequency-container">
 
-        <!-- Currency misconfiguration error -->
-        <template lwc:if={hasCurrencyError}>
-            <p class="amount-error" role="alert">{currencyConfigError}</p>
-        </template>
-
-        <template lwc:else>
-
         <!-- Frequency Toggle -->
         <template lwc:if={showFrequencyToggle}>
             <fieldset class="frequency-toggle">
@@ -67,7 +60,6 @@
                 </template>
             </fieldset>
 
-            <!-- Impact narrative shown when a preset with a narrative is selected -->
             <template lwc:if={selectedPresetNarrative}>
                 <p class="impact-narrative" aria-live="polite">{selectedPresetNarrative}</p>
             </template>
@@ -78,7 +70,6 @@
             <label for={customAmountId} class="slds-assistive-text">{labels.ec_label_other_amount}</label>
             <div class="custom-amount-row">
 
-                <!-- Currency symbol prefix (locale-dependent) -->
                 <template lwc:if={isCurrencyPrefix}>
                     <span class="currency-adornment currency-adornment-prefix" aria-hidden="true">
                         {currencySymbol}
@@ -99,43 +90,22 @@
                     oninput={handleCustomAmountInput}
                 />
 
-                <!-- Currency symbol suffix (locale-dependent) -->
                 <template lwc:if={isCurrencySuffix}>
                     <span class="currency-adornment currency-adornment-suffix" aria-hidden="true">
                         {currencySymbol}
                     </span>
                 </template>
 
-                <!-- Multi-currency selector -->
-                <template lwc:if={showCurrencySelector}>
-                    <select
-                        class="currency-select"
-                        aria-label={labels.ec_label_currency_selector}
-                        onchange={handleCurrencyChange}
-                    >
-                        <template for:each={currencyOptions} for:item="opt">
-                            <option key={opt.value} value={opt.value} selected={opt.isSelected}>
-                                {opt.label}
-                            </option>
-                        </template>
-                    </select>
-                </template>
-                <!-- Single-currency static indicator -->
-                <template lwc:else>
-                    <span class="currency-code-static" aria-hidden="true">{singleCurrencyCode}</span>
-                </template>
+                <span class="currency-code-static" aria-hidden="true">{defaultCurrency}</span>
 
             </div>
 
-            <!-- Validation error (role="alert" announces immediately to screen readers) -->
             <template lwc:if={hasValidationError}>
                 <p id={customAmountErrorId} role="alert" class="amount-error">
                     {validationError}
                 </p>
             </template>
         </div>
-
-        </template><!-- lwc:else (no currency error) -->
 
     </div>
 </template>

@@ -54,6 +54,13 @@
             <stringValue>{&quot;location&quot;:&quot;top&quot;,&quot;type&quot;:&quot;simple&quot;}</stringValue>
         </value>
     </customProperties>
+    <dynamicChoiceSets>
+        <name>ActiveCurrencies</name>
+        <dataType>Picklist</dataType>
+        <picklistField>CurrencyIsoCode</picklistField>
+        <picklistObject>cpm__Installment__c</picklistObject>
+        <sortOrder>Asc</sortOrder>
+    </dynamicChoiceSets>
     <environments>Default</environments>
     <formulas>
         <name>IsCurrentUserSysAdmin</name>
@@ -130,6 +137,23 @@
             </styleProperties>
         </fields>
         <fields>
+            <name>CurrencyPicklist</name>
+            <choiceReferences>ActiveCurrencies</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Choose the currency</fieldText>
+            <fieldType>DropdownBox</fieldType>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
+            <isRequired>true</isRequired>
+            <styleProperties>
+                <verticalAlignment>
+                    <stringValue>top</stringValue>
+                </verticalAlignment>
+                <width>
+                    <stringValue>12</stringValue>
+                </width>
+            </styleProperties>
+        </fields>
+        <fields>
             <name>amountAndFrequency</name>
             <extensionName>c:amountAndFrequency</extensionName>
             <fieldType>ComponentInstance</fieldType>
@@ -173,6 +197,12 @@
                 <name>minAmount</name>
                 <value>
                     <numberValue>1.0</numberValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>defaultFrequency</name>
+                <value>
+                    <stringValue>recurring</stringValue>
                 </value>
             </inputParameters>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
