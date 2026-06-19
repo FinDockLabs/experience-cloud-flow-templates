@@ -19,16 +19,29 @@ function makePresets(amountStr, defaults) {
 }
 
 function toAmountString(presets) {
-    return presets
-        .filter(p => p.amount !== '' && Number(p.amount) > 0)
-        .map(p => String(Number(p.amount)))
-        .join(',');
+    const parts = presets.map(p =>
+        (p.amount !== '' && Number(p.amount) > 0) ? String(Number(p.amount)) : ''
+    );
+    while (parts.length > 0 && parts[parts.length - 1] === '') {
+        parts.pop();
+    }
+    return parts.join(',');
 }
 
 export default class AmountAndFrequencyConfig extends LightningElement {
     @api builderContext;
     @api automaticOutputVariables;
-    @api inputVariables;
+
+    _inputVariables = [];
+
+    @api
+    get inputVariables() {
+        return this._inputVariables;
+    }
+    set inputVariables(value) {
+        this._inputVariables = value;
+        this._hydrate();
+    }
 
     @track _presetsOneTime   = makePresets('', DEFAULT_AMOUNTS_ONE_TIME);
     @track _presetsRecurring = makePresets('', DEFAULT_AMOUNTS_RECURRING);
@@ -114,7 +127,6 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     connectedCallback() {
-        this._hydrate();
         this._autoBindCurrency();
     }
 
@@ -127,13 +139,22 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     _hydrate() {
-        const vars = Array.isArray(this.inputVariables) ? this.inputVariables : [];
+        const vars = Array.isArray(this._inputVariables) ? this._inputVariables : [];
         const get  = name => { const v = vars.find(x => x.name === name); return v != null ? v.value : null; };
 
-        const freq1 = get('freq1Value') ?? 'oneTime';
-        const freq2 = get('freq2Value') ?? 'recurring';
-        this._showOneTime = !!freq1;
-        this._showMonthly = !!freq2;
+        const freq1 = get('freq1Value');
+        const freq2 = get('freq2Value');
+
+        if (freq1 === 'recurring') {
+            this._showOneTime = false;
+            this._showMonthly = true;
+        } else if (freq2 === 'none') {
+            this._showOneTime = true;
+            this._showMonthly = false;
+        } else {
+            this._showOneTime = true;
+            this._showMonthly = true;
+        }
 
         this._defaultFrequency = get('defaultFrequency') ?? 'oneTime';
         this._minAmount        = get('minAmount')        ?? 1;
@@ -169,11 +190,11 @@ export default class AmountAndFrequencyConfig extends LightningElement {
             this._emit('showFrequencyToggle', true, 'Boolean');
         } else if (this._showOneTime) {
             this._emit('freq1Value', 'oneTime');
-            this._emit('freq2Value', '');
+            this._emit('freq2Value', 'none');
             this._emit('showFrequencyToggle', false, 'Boolean');
         } else if (this._showMonthly) {
             this._emit('freq1Value', 'recurring');
-            this._emit('freq2Value', '');
+            this._emit('freq2Value', 'recurring');
             this._emit('showFrequencyToggle', false, 'Boolean');
         }
         this._emit('defaultFrequency', this._defaultFrequency);
