@@ -111,59 +111,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
 
     connectedCallback() {
         this._hydrate();
-        // Автоматически связываем LWC с пикером валюты во Flow при инициализации
         this._autoBindCurrency();
-    }
-
-    handleToggleFrequency() {
-        this._frequencyOpen = !this._frequencyOpen;
-    }
-
-    handleShowOneTimeChange(event) {
-        this._showOneTime = event.target.checked;
-        if (!this._showOneTime && this._defaultFrequency === 'oneTime') this._defaultFrequency = 'recurring';
-        this._emitFrequencyConfig();
-    }
-
-    handleShowMonthlyChange(event) {
-        this._showMonthly = event.target.checked;
-        if (!this._showMonthly && this._defaultFrequency === 'recurring') this._defaultFrequency = 'oneTime';
-        this._emitFrequencyConfig();
-    }
-
-    handleDefaultFrequencyChange(event) {
-        this._defaultFrequency = event.detail.value;
-        this._emit('defaultFrequency', this._defaultFrequency);
-    }
-
-    handlePresetOTAmountChange(event) {
-        const idx    = Number(event.target.dataset.index);
-        const amount = this._sanitizePresetAmount(event);
-        this._presetsOneTime = this._presetsOneTime.map((p, i) => i === idx ? { ...p, amount } : p);
-        this._emit('presetAmountsOneTime', toAmountString(this._presetsOneTime));
-    }
-
-    handlePresetRecAmountChange(event) {
-        const idx    = Number(event.target.dataset.index);
-        const amount = this._sanitizePresetAmount(event);
-        this._presetsRecurring = this._presetsRecurring.map((p, i) => i === idx ? { ...p, amount } : p);
-        this._emit('presetAmountsRecurring', toAmountString(this._presetsRecurring));
-    }
-
-    handleMinAmountChange(event) {
-        const val = parseInt(event.target.value, 10);
-        if (!isNaN(val) && val >= 0) {
-            this._minAmount = val;
-            this._emit('minAmount', val, 'Number');
-        }
-    }
-
-    handleMaxAmountChange(event) {
-        const val = parseInt(event.target.value, 10);
-        if (!isNaN(val) && val >= 0) {
-            this._maxAmount = val;
-            this._emit('maxAmount', val, 'Number');
-        }
     }
 
     _sanitizePresetAmount(event) {
@@ -245,5 +193,56 @@ export default class AmountAndFrequencyConfig extends LightningElement {
             bubbles: true, composed: true,
             detail: { name, newValue, newValueDataType }
         }));
+    }
+
+    handleToggleFrequency() {
+        this._frequencyOpen = !this._frequencyOpen;
+    }
+
+    handleShowOneTimeChange(event) {
+        this._showOneTime = event.target.checked;
+        if (!this._showOneTime && this._defaultFrequency === 'oneTime') this._defaultFrequency = 'recurring';
+        this._emitFrequencyConfig();
+    }
+
+    handleShowMonthlyChange(event) {
+        this._showMonthly = event.target.checked;
+        if (!this._showMonthly && this._defaultFrequency === 'recurring') this._defaultFrequency = 'oneTime';
+        this._emitFrequencyConfig();
+    }
+
+    handleDefaultFrequencyChange(event) {
+        this._defaultFrequency = event.detail.value;
+        this._emit('defaultFrequency', this._defaultFrequency);
+    }
+
+    handlePresetOTAmountChange(event) {
+        const idx    = Number(event.target.dataset.index);
+        const amount = this._sanitizePresetAmount(event);
+        this._presetsOneTime = this._presetsOneTime.map((p, i) => i === idx ? { ...p, amount } : p);
+        this._emit('presetAmountsOneTime', toAmountString(this._presetsOneTime));
+    }
+
+    handlePresetRecAmountChange(event) {
+        const idx    = Number(event.target.dataset.index);
+        const amount = this._sanitizePresetAmount(event);
+        this._presetsRecurring = this._presetsRecurring.map((p, i) => i === idx ? { ...p, amount } : p);
+        this._emit('presetAmountsRecurring', toAmountString(this._presetsRecurring));
+    }
+
+    handleMinAmountChange(event) {
+        const val = parseInt(event.target.value, 10);
+        if (!isNaN(val) && val >= 0) {
+            this._minAmount = val;
+            this._emit('minAmount', val, 'Number');
+        }
+    }
+
+    handleMaxAmountChange(event) {
+        const val = parseInt(event.target.value, 10);
+        if (!isNaN(val) && val >= 0) {
+            this._maxAmount = val;
+            this._emit('maxAmount', val, 'Number');
+        }
     }
 }
