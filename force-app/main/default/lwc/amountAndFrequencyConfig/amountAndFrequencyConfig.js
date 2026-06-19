@@ -1,4 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
+import CURRENCY from '@salesforce/i18n/currency';
 
 const PRESET_COUNT = 6;
 
@@ -101,7 +102,10 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     get presetCurrencySymbol() {
-        return '$';
+        if (!this._defaultCurrency || this._defaultCurrency.includes('{')) {
+            return '';
+        }
+        return this._getCurrencySymbol(this._defaultCurrency);
     }
 
     connectedCallback() {
@@ -177,22 +181,27 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         this._defaultFrequency = get('defaultFrequency') ?? 'oneTime';
         this._minAmount        = get('minAmount')        ?? 1;
         this._maxAmount        = get('maxAmount')        ?? 0;
-        this._defaultCurrency  = get('defaultCurrency')  ?? '';
+        const rawCurrency = get('defaultCurrency') ?? '';
+        this._defaultCurrency = /^[A-Z]{3}$/.test(rawCurrency) ? rawCurrency : (CURRENCY || '');
 
         this._presetsOneTime   = makePresets(get('presetAmountsOneTime'),   DEFAULT_AMOUNTS_ONE_TIME);
         this._presetsRecurring = makePresets(get('presetAmountsRecurring'), DEFAULT_AMOUNTS_RECURRING);
     }
 
     _autoBindCurrency() {
-        if (this.builderContext && this.builderContext.screenComponents) {
-            // Ищем, есть ли на текущем экране Flow компонент с именем CurrencyPicklist
-            const pickerExists = this.builderContext.screenComponents.some(
-                comp => comp.name === 'CurrencyPicklist'
-            );
+        if (!this.builderContext || !this.builderContext.screenComponents) return;
 
-            if (pickerExists) {
-                this._emit('defaultCurrency', 'CurrencyPicklist', 'Expression');
+        const picker = this.builderContext.screenComponents.find(comp => {
+            const name = (comp.name || '').toLowerCase();
+            return name === 'currencypicklist' || name === 'selectedcurrency';
+        });
+
+        if (picker) {
+            if (picker.value && typeof picker.value === 'string' && !picker.value.includes('{')) {
+                this._defaultCurrency = picker.value;
             }
+
+            this._emit('defaultCurrency', picker.name, 'Expression');
         }
     }
 
@@ -211,6 +220,19 @@ export default class AmountAndFrequencyConfig extends LightningElement {
             this._emit('showFrequencyToggle', false, 'Boolean');
         }
         this._emit('defaultFrequency', this._defaultFrequency);
+    }
+
+    _getCurrencySymbol(code) {
+        if (!code) return '';
+        try {
+            const parts = new Intl.NumberFormat('en-US', {
+                style: 'currency', currency: code, minimumFractionDigits: 0
+            }).formatToParts(0);
+            const sym = parts.find(p => p.type === 'currency');
+            return sym ? sym.value : code;
+        } catch {
+            return code;
+        }
     }
 
     _emit(name, newValue, newValueDataType = 'String') {

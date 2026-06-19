@@ -21,6 +21,7 @@ export default class AmountAndFrequency extends LightningElement {
     _selectedPresetRecurring = null;
     _customAmount            = '';
     _validationError         = '';
+    _defaultCurrency         = '';
     labels = labels;
 
     // ─── @api ─────────────────────────────────────────────────────────────────
@@ -38,8 +39,18 @@ export default class AmountAndFrequency extends LightningElement {
 
     @api minAmount       = 1;
     @api maxAmount       = null;
-    @api defaultCurrency = '';
     @api defaultFrequency = '';
+
+    @api
+    get defaultCurrency() {
+        return this._defaultCurrency;
+    }
+    set defaultCurrency(value) {
+        const next = value || '';
+        if (this._defaultCurrency === next) return;
+        this._defaultCurrency = next;
+        this.dispatchEvent(new FlowAttributeChangeEvent('selectedCurrency', next));
+    }
 
     @api
     get frequency() {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <apiVersion>67.0</apiVersion>
     <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <assignments>
@@ -59,6 +59,8 @@
         <dataType>Picklist</dataType>
         <picklistField>CurrencyIsoCode</picklistField>
         <picklistObject>cpm__Installment__c</picklistObject>
+        <displayField xsi:nil="true"/>
+        <object xsi:nil="true"/>
         <sortOrder>Asc</sortOrder>
     </dynamicChoiceSets>
     <environments>Default</environments>
@@ -137,7 +139,7 @@
             </styleProperties>
         </fields>
         <fields>
-            <name>CurrencyPicklist</name>
+            <name>SelectedCurrency</name>
             <choiceReferences>ActiveCurrencies</choiceReferences>
             <dataType>String</dataType>
             <fieldText>Choose the currency</fieldText>
@@ -190,7 +192,7 @@
             <inputParameters>
                 <name>defaultCurrency</name>
                 <value>
-                    <stringValue>EUR</stringValue>
+                    <elementReference>SelectedCurrency</elementReference>
                 </value>
             </inputParameters>
             <inputParameters>
@@ -441,7 +443,7 @@
             <inputParameters>
                 <name>pixConfig</name>
                 <value>
-                    <stringValue>{&quot;payer&quot;:{&quot;contactObject&quot;:{&quot;name&quot;:&quot;payerContactVarName&quot;,&quot;value&quot;:&quot;{!Contact_Record}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}},&quot;paymentMethod&quot;:{&quot;name&quot;:&quot;paymentMethodObjectVar&quot;,&quot;value&quot;:&quot;{!Payment_Method_Selector.context}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;oneTime&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;oneTimeAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountOneTime}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;oneTimeCurrencyVar&quot;,&quot;value&quot;:&quot;EUR&quot;,&quot;valueDataType&quot;:&quot;String&quot;}}},&quot;recurring&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;recurringAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountRecurring}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;recurringCurrencyVar&quot;,&quot;value&quot;:&quot;EUR&quot;,&quot;valueDataType&quot;:&quot;String&quot;},&quot;frequency&quot;:{&quot;name&quot;:&quot;recurringFrequencyVar&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.frequency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}}},&quot;successUrl&quot;:{&quot;name&quot;:&quot;successUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/success&quot;,&quot;valueDataType&quot;:&quot;String&quot;},&quot;failureUrl&quot;:{&quot;name&quot;:&quot;failureUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/failure&quot;,&quot;valueDataType&quot;:&quot;String&quot;}}</stringValue>
+                    <stringValue>{&quot;payer&quot;:{&quot;contactObject&quot;:{&quot;name&quot;:&quot;payerContactVarName&quot;,&quot;value&quot;:&quot;{!Contact_Record}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}},&quot;paymentMethod&quot;:{&quot;name&quot;:&quot;paymentMethodObjectVar&quot;,&quot;value&quot;:&quot;{!Payment_Method_Selector.context}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;oneTime&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;oneTimeAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountOneTime}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;oneTimeCurrencyVar&quot;,&quot;value&quot;:&quot;{!SelectedCurrency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}}},&quot;recurring&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;recurringAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountRecurring}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;recurringCurrencyVar&quot;,&quot;value&quot;:&quot;{!SelectedCurrency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;frequency&quot;:{&quot;name&quot;:&quot;recurringFrequencyVar&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.frequency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}}},&quot;successUrl&quot;:{&quot;name&quot;:&quot;successUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/success&quot;,&quot;valueDataType&quot;:&quot;String&quot;},&quot;failureUrl&quot;:{&quot;name&quot;:&quot;failureUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/failure&quot;,&quot;valueDataType&quot;:&quot;String&quot;}}</stringValue>
                 </value>
             </inputParameters>
             <inputParameters>
