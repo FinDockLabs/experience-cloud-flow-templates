@@ -1,6 +1,7 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
 import { labels } from './amountAndFrequencyLabels';
+import getCurrencyContext from '@salesforce/apex/CurrencyService.getCurrencyContext';
 
 const DEFAULT_AMOUNTS_ONE_TIME  = '25,50,100,250,500,1000';
 const DEFAULT_AMOUNTS_RECURRING = '5,10,25,60,125,250';
@@ -16,6 +17,11 @@ export default class AmountAndFrequency extends LightningElement {
     _customAmount = '';
     _selectedCurrency = '';
     _validationError = '';
+    _orgCurrencies = null;
+    _orgDefault = null;
+    _userCurrency = null;
+    _currencySelectedExplicitly = false;
+    _wiredResolved= false;
 
     labels = labels;
 
@@ -38,9 +44,16 @@ export default class AmountAndFrequency extends LightningElement {
     // ─── Currency ─────────────────────────────────────────────────────────────
 
     @api availableCurrencies = '';
-    @api defaultCurrency = 'USD';
+    @api defaultCurrency = '';
     /** Pre-selects a frequency when the component first renders, e.g. 'recurring'. */
     @api defaultFrequency = '';
+    /**
+     * Controls how the active currency list and default are resolved.
+     * 'config'  — use availableCurrencies + defaultCurrency from CPE (default).
+     * 'user'    — auto-detect from the running user's DefaultCurrencyIsoCode; org currencies as list.
+     * 'flow'    — org currencies as list; defaultCurrency supplied via a Flow variable.
+     */
+    @api currencySource = 'config';
 
     // ─── Flow output: frequency ───────────────────────────────────────────────
     @api
@@ -158,9 +171,34 @@ export default class AmountAndFrequency extends LightningElement {
         return opt ? opt.narrative : '';
     }
 
+    // Resolves the final currency list based on currencySource, org data, and CPE whitelist.
+    get _effectiveCurrencies() {
+        const org = this._orgCurrencies;
+        const cpe = this.parseCurrencies(this.availableCurrencies);
+
+        if (this.currencySource === 'config') {
+            const base = cpe.length > 0 ? cpe : (org || []);
+            return org ? base.filter(c => org.includes(c)) : base;
+        }
+
+        // 'user' or 'flow': org is the source of truth; CPE list acts as optional whitelist.
+        const base = org || (cpe.length > 0 ? cpe : []);
+        return cpe.length > 0 ? base.filter(c => cpe.includes(c)) : base;
+    }
+
+    get currencyConfigError() {
+        if (!this._wiredResolved) return '';
+        return this._effectiveCurrencies.length === 0
+            ? this.labels.ec_label_currency_not_configured
+            : '';
+    }
+
+    get hasCurrencyError() {
+        return !!this.currencyConfigError;
+    }
+
     get currencyOptions() {
-        const currencies = this.parseCurrencies(this.availableCurrencies);
-        const list       = currencies.length > 0 ? currencies : [this._selectedCurrency];
+        const list = this._effectiveCurrencies;
         return list.map(c => ({ value: c, label: c, isSelected: c === this._selectedCurrency }));
     }
 
@@ -203,12 +241,14 @@ export default class AmountAndFrequency extends LightningElement {
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
     connectedCallback() {
-        this._selectedCurrency = this.defaultCurrency || 'USD';
+        // 'user' mode: leave _selectedCurrency empty until wire data arrives,
+        // unless sessionStorage or URL params provide a value.
+        if (this.currencySource !== 'user') {
+            this._selectedCurrency = this.defaultCurrency || '';
+        }
         if (this.defaultFrequency) {
             this._frequency = this.defaultFrequency;
         }
-        // Restore user's full selection on back-navigation.
-        // sessionStorage overrides defaults above; URL params override sessionStorage.
         this._restoreState();
         this._applyQueryParams();
     }
@@ -216,6 +256,51 @@ export default class AmountAndFrequency extends LightningElement {
     disconnectedCallback() {
         // Persist selection so it survives Flow back-navigation (component remount).
         this._saveState();
+    }
+
+    // ─── Wire: org currency context ───────────────────────────────────────────
+    @wire(getCurrencyContext)
+    _wiredCurrency({ data, error }) {
+        this._wiredResolved = true;
+
+        if (error) {
+            // Apex unavailable (e.g. class not yet granted to Guest User Profile).
+            // Degrade to CPE-configured list; leave currency empty if nothing is configured.
+            const cpeCurrencies = this.parseCurrencies(this.availableCurrencies);
+            this._orgCurrencies = cpeCurrencies.length > 0 ? cpeCurrencies
+                                : (this.defaultCurrency    ? [this.defaultCurrency] : []);
+            this._orgDefault    = this.defaultCurrency || '';
+            this._userCurrency  = this.defaultCurrency || '';
+            if (!this._currencySelectedExplicitly) {
+                const effective = this._effectiveCurrencies;
+                if (effective.length > 0) {
+                    this._selectedCurrency = effective[0];
+                    this._dispatchChange();
+                }
+            }
+            return;
+        }
+
+        if (!data) return;
+
+        this._orgCurrencies = data.orgCurrencies || [];
+        this._orgDefault    = data.orgDefault    || '';
+        this._userCurrency  = data.userCurrency  || this._orgDefault;
+
+        if (this.currencySource === 'user' && !this._currencySelectedExplicitly) {
+            const candidate = this._userCurrency;
+            if (candidate && this._effectiveCurrencies.includes(candidate)) {
+                this._selectedCurrency = candidate;
+                this._dispatchChange();
+            }
+        }
+
+        const effective = this._effectiveCurrencies;
+        if (effective.length > 0 && !effective.includes(this._selectedCurrency)) {
+            this._selectedCurrency = effective[0];
+            this._currencySelectedExplicitly = false;
+            this._dispatchChange();
+        }
     }
 
     _storageKey() {
@@ -245,7 +330,10 @@ export default class AmountAndFrequency extends LightningElement {
             if (s.frequency)                     this._frequency        = s.frequency;
             if (s.selectedPreset !== undefined)  this._selectedPreset   = s.selectedPreset;
             if (s.customAmount   !== undefined)  this._customAmount     = s.customAmount;
-            if (s.selectedCurrency)              this._selectedCurrency = s.selectedCurrency;
+            if (s.selectedCurrency) {
+                this._selectedCurrency           = s.selectedCurrency;
+                this._currencySelectedExplicitly = true;
+            }
         } catch { /* ignore parse errors */ }
     }
 
@@ -301,7 +389,8 @@ export default class AmountAndFrequency extends LightningElement {
     }
 
     handleCurrencyChange(event) {
-        this._selectedCurrency = event.target.value;
+        this._selectedCurrency           = event.target.value;
+        this._currencySelectedExplicitly = true;
         this._dispatchChange();
     }
 

@@ -40,6 +40,7 @@
 
 .chip-btn {
     padding: 0.3rem 0.875rem;
+    min-height: 1.5rem;
     border: 1.5px solid #0176D3;
     border-radius: 1rem;
     background: transparent;
@@ -60,6 +61,12 @@
 .chip-btn-active {
     background: #0176D3;
     color: #ffffff;
+}
+
+.chip-btn-readonly {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.75;
 }
 
 /* ─── Preset amount sublabels ────────────────────────────────────────────── */
@@ -94,7 +101,12 @@
 
 .amount-cell:focus-within {
     border-color: #0176D3;
-    box-shadow: 0 0 0 1px #0176D3;
+    box-shadow: 0 0 0 2px #0176D3;
+}
+
+.amount-native-input:focus-visible {
+    outline: 2px solid #0176D3;
+    outline-offset: 0;
 }
 
 .amount-symbol {

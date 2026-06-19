@@ -1,22 +1,10 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
+import getCurrencyContext from '@salesforce/apex/CurrencyService.getCurrencyContext';
 
 const PRESET_COUNT = 6;
 
 const DEFAULT_AMOUNTS_ONE_TIME  = [25, 50, 100, 250, 500, 1000];
 const DEFAULT_AMOUNTS_RECURRING = [5, 10, 25, 60, 125, 250];
-
-const CURRENCIES = [
-    { code: 'EUR', symbol: '€',   label: 'EUR — €' },
-    { code: 'USD', symbol: '$',   label: 'USD — $' },
-    { code: 'GBP', symbol: '£',   label: 'GBP — £' },
-    { code: 'CAD', symbol: 'CA$', label: 'CAD — CA$' },
-    { code: 'AUD', symbol: 'A$',  label: 'AUD — A$' },
-    { code: 'CHF', symbol: 'CHF', label: 'CHF — CHF' },
-    { code: 'SEK', symbol: 'kr',  label: 'SEK — kr' },
-    { code: 'NOK', symbol: 'kr',  label: 'NOK — kr' },
-    { code: 'DKK', symbol: 'kr',  label: 'DKK — kr' },
-    { code: 'NZD', symbol: 'NZ$', label: 'NZD — NZ$' },
-];
 
 function makePresets(amountStr, defaults) {
     const amounts = amountStr
@@ -44,19 +32,65 @@ export default class AmountAndFrequencyConfig extends LightningElement {
 
     @track _presetsOneTime   = makePresets('', DEFAULT_AMOUNTS_ONE_TIME);
     @track _presetsRecurring = makePresets('', DEFAULT_AMOUNTS_RECURRING);
-    @track _checkedCurrencies = ['EUR'];
+    @track _checkedCurrencies = [];
 
     _showOneTime      = true;
     _showMonthly      = true;
     _defaultFrequency = 'oneTime';
     _minAmount        = 1;
     _maxAmount        = 0;
-    _defaultCurrency  = 'EUR';
+    @track _defaultCurrency  = '';
+    _currencySource    = 'config';
+    _wiredCurrencies   = [];
+    _isMultiCurrency   = false;
+    _orgDefault        = '';
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     connectedCallback() {
         this._hydrate();
+    }
+
+    // ─── Wire: org currency context ───────────────────────────────────────────
+
+    @wire(getCurrencyContext)
+    _handleCurrencies({ data, error }) {
+        if (error || !data) return;
+
+        this._wiredCurrencies = data.orgCurrencies || [];
+        this._isMultiCurrency = this._wiredCurrencies.length > 1;
+        this._orgDefault      = data.orgDefault || '';
+
+        if (!this._isMultiCurrency) {
+            // Single-currency org: auto-apply the only currency, no admin selection needed.
+            const code = this._wiredCurrencies[0] || data.orgDefault;
+            if (code) {
+                this._checkedCurrencies = [code];
+                this._defaultCurrency   = code;
+                this._emit('availableCurrencies', code);
+                this._emit('defaultCurrency',     code);
+            }
+            return;
+        }
+
+        // Multi-currency: validate any previously saved selection against live org currencies.
+        if (this._checkedCurrencies.length > 0) {
+            const valid = this._checkedCurrencies.filter(c => this._wiredCurrencies.includes(c));
+            if (valid.length !== this._checkedCurrencies.length) {
+                this._checkedCurrencies = valid;
+                this._emit('availableCurrencies', valid.join(','));
+            }
+        } else if (this._currencySource === 'config') {
+            // First-time setup in config mode: pre-select all org currencies.
+            this._checkedCurrencies = [...this._wiredCurrencies];
+            this._emit('availableCurrencies', this._checkedCurrencies.join(','));
+        }
+
+        // Ensure default currency is still active in this org.
+        if (!this._defaultCurrency || !this._wiredCurrencies.includes(this._defaultCurrency)) {
+            this._defaultCurrency = this._checkedCurrencies[0] || this._wiredCurrencies[0] || '';
+            if (this._defaultCurrency) this._emit('defaultCurrency', this._defaultCurrency);
+        }
     }
 
     _hydrate() {
@@ -71,12 +105,13 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         this._defaultFrequency = get('defaultFrequency') ?? 'oneTime';
         this._minAmount        = get('minAmount')        ?? 1;
         this._maxAmount        = get('maxAmount')        ?? 0;
-        this._defaultCurrency  = get('defaultCurrency')  ?? 'EUR';
+        this._defaultCurrency  = get('defaultCurrency')  ?? '';
+        this._currencySource   = get('currencySource')   ?? 'config';
 
         const rawCurrencies = get('availableCurrencies') ?? '';
         this._checkedCurrencies = rawCurrencies
             ? rawCurrencies.split(',').map(s => s.trim()).filter(Boolean)
-            : ['EUR'];
+            : [];
 
         this._presetsOneTime   = makePresets(get('presetAmountsOneTime'), DEFAULT_AMOUNTS_ONE_TIME);
         this._presetsRecurring = makePresets(get('presetAmountsRecurring'), DEFAULT_AMOUNTS_RECURRING);
@@ -153,24 +188,101 @@ export default class AmountAndFrequencyConfig extends LightningElement {
 
     // Currency ───
 
+    get currencySource() { return this._currencySource; }
+
+    get currencySourceOptions() {
+        return [
+            { label: 'Fixed (configured here)',         value: 'config' },
+            { label: 'Running user\'s currency (Apex)', value: 'user'   },
+            { label: 'Flow variable (bind below)',       value: 'flow'   }
+        ];
+    }
+
+    get isUserCurrencySource() {
+        return this._currencySource === 'user';
+    }
+
+    // True while the wire hasn't responded yet.
+    get isLoadingCurrencies() {
+        return this._wiredCurrencies.length === 0;
+    }
+
+    // Org has exactly one active currency — no selection needed.
+    get isSingleCurrency() {
+        return !this._isMultiCurrency && this._wiredCurrencies.length > 0;
+    }
+
+    get singleCurrencyCode() {
+        return this._wiredCurrencies[0] || '';
+    }
+
+    // Selectable chips — only in config mode (admin chooses a fixed subset).
+    get showCurrencySelector() {
+        return this._isMultiCurrency && this._currencySource === 'config';
+    }
+
+    // Read-only badges — flow mode shows all org currencies; admin binds default via Flow variable.
+    get showFlowCurrencyInfo() {
+        return this._isMultiCurrency && this._currencySource === 'flow';
+    }
+
+    get currencyChipLabel() {
+        return this._currencySource === 'config'
+            ? 'Select which currencies will be offered on this form.'
+            : 'Optional whitelist — leave all unchecked to show all org currencies.';
+    }
+
+    get showDefaultCurrencyPicker() {
+        return this._isMultiCurrency &&
+            (this._currencySource === 'config' || this._currencySource === 'flow');
+    }
+
     get currencyList() {
-        return CURRENCIES.map(c => ({
-            ...c,
-            isChecked: this._checkedCurrencies.includes(c.code),
-            chipClass: `chip-btn${this._checkedCurrencies.includes(c.code) ? ' chip-btn-active' : ''}`
+        return this._wiredCurrencies.map(code => ({
+            code,
+            label:     this._getCurrencyLabel(code),
+            isChecked: this._checkedCurrencies.includes(code),
+            chipClass: `chip-btn${this._checkedCurrencies.includes(code) ? ' chip-btn-active' : ''}`
         }));
     }
 
     get defaultCurrency() { return this._defaultCurrency; }
 
     get defaultCurrencyOptions() {
-        return CURRENCIES
-            .filter(c => this._checkedCurrencies.includes(c.code))
-            .map(c => ({ label: c.label, value: c.code }));
+        const source = this._checkedCurrencies.length > 0
+            ? this._checkedCurrencies
+            : this._wiredCurrencies;
+        return source.map(code => ({ label: this._getCurrencyLabel(code), value: code }));
     }
 
+    // Only required in multi-currency + config mode; other modes don't mandate a selection.
     get currencyError() {
+        if (!this._isMultiCurrency || this._currencySource !== 'config') return '';
         return this._checkedCurrencies.length === 0 ? 'Select at least one currency.' : '';
+    }
+
+    // Symbol shown next to preset amount inputs.
+    // In 'user' mode _defaultCurrency is not configured, so fall back to the org default.
+    get presetCurrencySymbol() {
+        return this._getCurrencySymbol(this._defaultCurrency || this._orgDefault);
+    }
+
+    _getCurrencySymbol(code) {
+        if (!code) return '';
+        try {
+            const parts = new Intl.NumberFormat(navigator.language || 'en-US', {
+                style: 'currency', currency: code, minimumFractionDigits: 0
+            }).formatToParts(0);
+            const sym = parts.find(p => p.type === 'currency');
+            return sym ? sym.value : code;
+        } catch {
+            return code;
+        }
+    }
+
+    _getCurrencyLabel(code) {
+        const sym = this._getCurrencySymbol(code);
+        return sym && sym !== code ? `${code} — ${sym}` : code;
     }
 
     // ─── Frequency handlers ───────────────────────────────────────────────────
@@ -216,19 +328,30 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     // ─── Preset amount handlers ────────────────────────────────────────────────
 
     handlePresetOTAmountChange(event) {
-        const idx = Number(event.target.dataset.index);
-        this._presetsOneTime = this._presetsOneTime.map((p, i) =>
-            i === idx ? { ...p, amount: event.target.value !== '' ? Number(event.target.value) : '' } : p
-        );
+        const idx    = Number(event.target.dataset.index);
+        const amount = this._sanitizePresetAmount(event);
+        this._presetsOneTime = this._presetsOneTime.map((p, i) => i === idx ? { ...p, amount } : p);
         this._emit('presetAmountsOneTime', toAmountString(this._presetsOneTime));
     }
 
     handlePresetRecAmountChange(event) {
-        const idx = Number(event.target.dataset.index);
-        this._presetsRecurring = this._presetsRecurring.map((p, i) =>
-            i === idx ? { ...p, amount: event.target.value !== '' ? Number(event.target.value) : '' } : p
-        );
+        const idx    = Number(event.target.dataset.index);
+        const amount = this._sanitizePresetAmount(event);
+        this._presetsRecurring = this._presetsRecurring.map((p, i) => i === idx ? { ...p, amount } : p);
         this._emit('presetAmountsRecurring', toAmountString(this._presetsRecurring));
+    }
+
+    // Returns the sanitized amount value: empty string, or a positive number.
+    // Negative input is cleared immediately so the field resets to empty.
+    _sanitizePresetAmount(event) {
+        const raw = event.target.value;
+        if (raw === '') return '';
+        const num = Number(raw);
+        if (num < 0) {
+            event.target.value = '';
+            return '';
+        }
+        return num;
     }
 
     // ─── Other amount handlers ────────────────────────────────────────────────
@@ -250,6 +373,17 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     // ─── Currency handlers ────────────────────────────────────────────────────
+
+    handleCurrencySourceChange(event) {
+        this._currencySource = event.detail.value;
+        this._emit('currencySource', this._currencySource);
+        // In flow/user mode the runtime uses org currencies directly;
+        // clear the CPE-managed list so it doesn't act as an unintended filter.
+        if (this._currencySource !== 'config') {
+            this._checkedCurrencies = [];
+            this._emit('availableCurrencies', '');
+        }
+    }
 
     handleCurrencyToggle(event) {
         const code      = event.currentTarget.dataset.code;

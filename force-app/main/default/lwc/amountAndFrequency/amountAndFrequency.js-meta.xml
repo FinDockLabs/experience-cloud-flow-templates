@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>66.0</apiVersion>
+    <apiVersion>67.0</apiVersion>
     <description>Amount and Frequency Selector for donation forms</description>
     <isExposed>true</isExposed>
     <masterLabel>Amount and Frequency Selector</masterLabel>
@@ -24,7 +24,8 @@
             <property name="maxAmount"                 type="Integer" role="inputOnly" label="Maximum amount (0 = none)"                             description="Maximum accepted value. Set to 0 for no limit."                                      default="0"               />
 
             <property name="availableCurrencies" type="String" role="inputOnly" label="Available currencies (comma-separated ISO codes)"  description="e.g. USD,EUR,GBP. Leave blank for single-currency mode (no selector shown)."  />
-            <property name="defaultCurrency"     type="String" role="inputOnly" label="Default currency code"                             description="ISO 4217 code pre-selected on load, e.g. USD."  default="USD"                 />
+            <property name="defaultCurrency"     type="String" role="inputOnly" label="Default currency code"                             description="ISO 4217 code pre-selected on load, e.g. EUR. Leave blank to auto-select the first available currency."  default="USD"  />
+            <property name="currencySource"      type="String" role="inputOnly" label="Currency source"                                  description="config = CPE list; user = running user currency (Apex); flow = bind defaultCurrency to a Flow variable."  default="config"  />
             <property name="defaultFrequency"    type="String" role="inputOnly" label="Default frequency"                                 description="Frequency pre-selected when the component loads, e.g. oneTime or recurring."      />
 
             <property name="frequency"        type="String"  role="outputOnly" label="Frequency"          description="API value of the selected frequency (matches freq1Value or freq2Value)."/>

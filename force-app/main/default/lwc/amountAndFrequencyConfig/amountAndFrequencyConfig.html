@@ -9,7 +9,7 @@
                 <button type="button" class={monthlyChipClass} onclick={handleShowMonthlyChange}>Monthly</button>
             </div>
             <template lwc:if={frequencyError}>
-                <p class="field-error">{frequencyError}</p>
+                <p class="field-error" role="alert">{frequencyError}</p>
             </template>
             <template lwc:if={showDefaultFrequency}>
                 <lightning-combobox
@@ -34,7 +34,7 @@
                 <div class="amounts-grid">
                     <template for:each={presetsOneTime} for:item="preset">
                         <div key={preset.key} class="amount-cell">
-                            <span class="amount-symbol" aria-hidden="true">$</span>
+                            <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
                             <input
                                 type="number"
                                 class="amount-native-input"
@@ -58,7 +58,7 @@
                 <div class="amounts-grid">
                     <template for:each={presetsRecurring} for:item="preset">
                         <div key={preset.key} class="amount-cell">
-                            <span class="amount-symbol" aria-hidden="true">$</span>
+                            <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
                             <input
                                 type="number"
                                 class="amount-native-input"
@@ -86,7 +86,7 @@
                 <div class="limit-field">
                     <span class="native-label">Minimum</span>
                     <div class="amount-cell">
-                        <span class="amount-symbol" aria-hidden="true">$</span>
+                        <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
                         <input
                             type="number"
                             class="amount-native-input"
@@ -101,7 +101,7 @@
                 <div class="limit-field">
                     <span class="native-label">Maximum</span>
                     <div class="amount-cell">
-                        <span class="amount-symbol" aria-hidden="true">$</span>
+                        <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
                         <input
                             type="number"
                             class="amount-native-input"
@@ -116,7 +116,7 @@
                 </div>
             </div>
             <template lwc:if={minMaxError}>
-                <p class="field-error">{minMaxError}</p>
+                <p class="field-error" role="alert">{minMaxError}</p>
             </template>
         </section>
 
@@ -125,26 +125,80 @@
         <!-- ── Currency ────────────────────────────────────────────────────────── -->
         <section class="cpe-section">
             <h3 class="section-heading">Currency</h3>
-            <div class="chip-group" role="group" aria-label="Available currencies">
-                <template for:each={currencyList} for:item="currency">
-                    <button
-                        key={currency.code}
-                        type="button"
-                        class={currency.chipClass}
-                        data-code={currency.code}
-                        onclick={handleCurrencyToggle}
-                    >{currency.code}</button>
-                </template>
-            </div>
-            <template lwc:if={currencyError}>
-                <p class="field-error">{currencyError}</p>
-            </template>
+
             <lightning-combobox
-                label="Default currency"
-                value={defaultCurrency}
-                options={defaultCurrencyOptions}
-                onchange={handleDefaultCurrencyChange}
+                label="Currency source"
+                value={currencySource}
+                options={currencySourceOptions}
+                onchange={handleCurrencySourceChange}
             ></lightning-combobox>
+
+            <!-- Running user's currency: no selection needed -->
+            <template lwc:if={isUserCurrencySource}>
+                <p class="section-desc field-spacer">Currency is resolved from the running user's profile at runtime.</p>
+            </template>
+
+            <!-- Single-currency org: auto-applied, no selection needed -->
+            <template lwc:elseif={isSingleCurrency}>
+                <p class="section-desc field-spacer">
+                    This org uses a single currency: <strong>{singleCurrencyCode}</strong>.
+                    It will be applied to the component automatically.
+                </p>
+            </template>
+
+            <!-- Multi-currency + flow: all org currencies shown, read-only -->
+            <template lwc:elseif={showFlowCurrencyInfo}>
+                <div class="field-spacer">
+                    <p class="section-desc">All active org currencies will be available on this form. New currencies added to your org are picked up automatically.</p>
+                    <div class="chip-group" role="list" aria-label="Active org currencies">
+                        <template for:each={currencyList} for:item="currency">
+                            <span key={currency.code} role="listitem" class="chip-btn chip-btn-active chip-btn-readonly">{currency.code}</span>
+                        </template>
+                    </div>
+                </div>
+                <lightning-combobox
+                    label="Default currency"
+                    value={defaultCurrency}
+                    options={defaultCurrencyOptions}
+                    onchange={handleDefaultCurrencyChange}
+                ></lightning-combobox>
+                <p class="section-desc field-spacer">To override this dynamically, bind <strong>Default currency</strong> to a Flow variable on the canvas.</p>
+            </template>
+
+            <!-- Multi-currency + config: admin selects a fixed subset -->
+            <template lwc:elseif={showCurrencySelector}>
+                <div class="field-spacer">
+                    <p class="section-desc">{currencyChipLabel}</p>
+                    <div class="chip-group" role="group" aria-label="Available currencies">
+                        <template for:each={currencyList} for:item="currency">
+                            <button
+                                key={currency.code}
+                                type="button"
+                                class={currency.chipClass}
+                                data-code={currency.code}
+                                onclick={handleCurrencyToggle}
+                            >{currency.code}</button>
+                        </template>
+                    </div>
+                    <template lwc:if={currencyError}>
+                        <p class="field-error" role="alert">{currencyError}</p>
+                    </template>
+                </div>
+                <template lwc:if={showDefaultCurrencyPicker}>
+                    <lightning-combobox
+                        label="Default currency"
+                        value={defaultCurrency}
+                        options={defaultCurrencyOptions}
+                        onchange={handleDefaultCurrencyChange}
+                    ></lightning-combobox>
+                </template>
+            </template>
+
+            <!-- Wire still loading -->
+            <template lwc:else>
+                <p class="section-desc field-spacer">Loading currencies…</p>
+            </template>
+
         </section>
     </div>
 </template>

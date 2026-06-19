@@ -25,6 +25,14 @@
         <value>Minimum amount is {0}</value>
     </labels>
     <labels>
+        <fullName>ec_label_currency_not_configured</fullName>
+        <categories>Experience Cloud</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error shown when no currency is available for the form</shortDescription>
+        <value>No currency is configured for this form. Please contact your administrator.</value>
+    </labels>
+    <labels>
         <fullName>ec_label_currency_selector</fullName>
         <categories>Accessibility</categories>
         <language>en_US</language>
