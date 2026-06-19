@@ -1,17 +1,28 @@
 <template>
-    <div class="cpe-root">
+    <div class="slds-var-p-around_small">
+
         <!-- ── Frequency ──────────────────────────────────────────────────────── -->
-        <section class="cpe-section">
-            <button type="button" class="section-header" onclick={handleToggleFrequency}>
-                <span class="section-heading">Frequency</span>
-                <lightning-icon
-                    icon-name={frequencyChevronName}
-                    size="xx-small"
-                    class="section-chevron"
-                ></lightning-icon>
-            </button>
-            <template lwc:if={frequencyOpen}>
-                <p class="section-desc">Choose which giving frequencies donors can pick. At least one is required.</p>
+        <div class={frequencySectionClass}>
+            <h3 class="slds-section__title">
+                <button
+                    type="button"
+                    class="slds-button slds-section__title-action"
+                    aria-expanded={frequencyOpen}
+                    onclick={handleToggleFrequency}
+                >
+                    <lightning-icon
+                        icon-name={frequencyChevronName}
+                        size="x-small"
+                        class="slds-button__icon slds-button__icon_left"
+                        aria-hidden="true"
+                    ></lightning-icon>
+                    <span class="slds-truncate" title="Frequency">Frequency</span>
+                </button>
+            </h3>
+            <div class="slds-section__content slds-var-p-top_x-small">
+                <p class="slds-text-body_small slds-text-color_weak slds-var-m-bottom_small">
+                    Choose which giving frequencies donors can pick. At least one is required.
+                </p>
 
                 <div class="slds-form-element">
                     <div class="slds-form-element__control">
@@ -25,7 +36,7 @@
                     </div>
                 </div>
 
-                <div class="slds-form-element slds-m-top_small">
+                <div class="slds-form-element slds-var-m-top_x-small">
                     <div class="slds-form-element__control">
                         <label class="slds-checkbox_toggle slds-grid slds-grid_vertical-align-center">
                             <input type="checkbox" checked={showMonthly} onchange={handleShowMonthlyChange} />
@@ -36,118 +47,140 @@
                         </label>
                     </div>
                 </div>
-                <template lwc:if={frequencyError}>
-                    <p class="field-error" role="alert">{frequencyError}</p>
-                </template>
-                <template lwc:if={showDefaultFrequency}>
-                    <lightning-combobox
-                        label="Default frequency"
-                        value={defaultFrequency}
-                        options={frequencyOptions}
-                        onchange={handleDefaultFrequencyChange}
-                    ></lightning-combobox>
-                </template>
-            </template>
-        </section>
 
-        <hr class="section-rule" />
+                <template lwc:if={frequencyError}>
+                    <p class="slds-form-error slds-var-m-top_x-small" role="alert">{frequencyError}</p>
+                </template>
+
+                <template lwc:if={showDefaultFrequency}>
+                    <div class="slds-var-m-top_small">
+                        <lightning-combobox
+                            label="Default frequency"
+                            value={defaultFrequency}
+                            options={frequencyOptions}
+                            onchange={handleDefaultFrequencyChange}
+                        ></lightning-combobox>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <hr class="slds-var-m-vertical_x-small" />
 
         <!-- ── Preset Amounts ──────────────────────────────────────────────────── -->
-        <section class="cpe-section">
-            <h3 class="section-heading">Preset amounts</h3>
+        <div class="slds-section slds-is-open">
+            <h3 class="slds-section__title">
+                <span class="slds-truncate slds-var-p-horizontal_small" title="Preset amounts">Preset amounts</span>
+            </h3>
+            <div class="slds-section__content slds-var-p-top_x-small">
 
-            <template lwc:if={showOneTime}>
-                <template lwc:if={showBothFrequencies}>
-                    <p class="subsection-label">One-time</p>
-                </template>
-                <div class="amounts-grid">
-                    <template for:each={presetsOneTime} for:item="preset">
-                        <div key={preset.key} class="amount-cell">
-                            <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
-                            <input
-                                type="number"
-                                class="amount-native-input"
-                                aria-label={preset.label}
-                                placeholder="0"
-                                value={preset.amount}
-                                min="0"
-                                step="any"
-                                data-index={preset.index}
-                                oninput={handlePresetOTAmountChange}
-                            />
-                        </div>
+                <template lwc:if={showOneTime}>
+                    <template lwc:if={showBothFrequencies}>
+                        <p class="slds-text-body_small slds-text-color_weak slds-var-m-bottom_x-small">One-time</p>
                     </template>
-                </div>
-            </template>
-
-            <template lwc:if={showMonthly}>
-                <template lwc:if={showBothFrequencies}>
-                    <p class="subsection-label">Monthly</p>
+                    <div class="slds-grid slds-wrap slds-gutters_x-small">
+                        <template for:each={presetsOneTime} for:item="preset">
+                            <div key={preset.key} class="slds-col slds-size_1-of-3 slds-var-m-bottom_x-small">
+                                <div class="amount-input-group">
+                                    <span class="amount-symbol">{presetCurrencySymbol}</span>
+                                    <input
+                                        type="number"
+                                        class="amount-input"
+                                        aria-label={preset.label}
+                                        placeholder="0"
+                                        value={preset.amount}
+                                        min="0"
+                                        step="any"
+                                        data-index={preset.index}
+                                        oninput={handlePresetOTAmountChange}
+                                    />
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </template>
-                <div class="amounts-grid">
-                    <template for:each={presetsRecurring} for:item="preset">
-                        <div key={preset.key} class="amount-cell">
-                            <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
-                            <input
-                                type="number"
-                                class="amount-native-input"
-                                aria-label={preset.label}
-                                placeholder="0"
-                                value={preset.amount}
-                                min="0"
-                                step="any"
-                                data-index={preset.index}
-                                oninput={handlePresetRecAmountChange}
-                            />
-                        </div>
+
+                <template lwc:if={showMonthly}>
+                    <template lwc:if={showBothFrequencies}>
+                        <p class="slds-text-body_small slds-text-color_weak slds-var-m-bottom_x-small">Monthly</p>
                     </template>
-                </div>
-            </template>
+                    <div class="slds-grid slds-wrap slds-gutters_x-small">
+                        <template for:each={presetsRecurring} for:item="preset">
+                            <div key={preset.key} class="slds-col slds-size_1-of-3 slds-var-m-bottom_x-small">
+                                <div class="amount-input-group">
+                                    <span class="amount-symbol">{presetCurrencySymbol}</span>
+                                    <input
+                                        type="number"
+                                        class="amount-input"
+                                        aria-label={preset.label}
+                                        placeholder="0"
+                                        value={preset.amount}
+                                        min="0"
+                                        step="any"
+                                        data-index={preset.index}
+                                        oninput={handlePresetRecAmountChange}
+                                    />
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
 
-        </section>
+            </div>
+        </div>
 
-        <hr class="section-rule" />
+        <hr class="slds-var-m-vertical_x-small" />
 
         <!-- ── Other Amount ────────────────────────────────────────────────────── -->
-        <section class="cpe-section">
-            <h3 class="section-heading">Other amount</h3>
-            <div class="limit-row">
-                <div class="limit-field">
-                    <span class="native-label">Minimum</span>
-                    <div class="amount-cell">
-                        <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
-                        <input
-                            type="number"
-                            class="amount-native-input"
-                            aria-label="Minimum amount"
-                            value={minAmount}
-                            min="0"
-                            step="1"
-                            oninput={handleMinAmountChange}
-                        />
+        <div class="slds-section slds-is-open">
+            <h3 class="slds-section__title">
+                <span class="slds-truncate slds-var-p-horizontal_small" title="Other amount">Other amount</span>
+            </h3>
+            <div class="slds-section__content slds-var-p-top_x-small">
+                <div class="slds-grid slds-gutters_small">
+                    <div class="slds-col slds-size_1-of-2">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="min-amount-input">Minimum</label>
+                            <div class="amount-input-group">
+                                <span class="amount-symbol">{presetCurrencySymbol}</span>
+                                <input
+                                    type="number"
+                                    id="min-amount-input"
+                                    class="amount-input"
+                                    aria-label="Minimum amount"
+                                    value={minAmount}
+                                    min="0"
+                                    step="1"
+                                    oninput={handleMinAmountChange}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="max-amount-input">Maximum</label>
+                            <div class="amount-input-group">
+                                <span class="amount-symbol">{presetCurrencySymbol}</span>
+                                <input
+                                    type="number"
+                                    id="max-amount-input"
+                                    class="amount-input"
+                                    aria-label="Maximum amount"
+                                    placeholder="No limit"
+                                    value={maxAmount}
+                                    min="0"
+                                    step="1"
+                                    oninput={handleMaxAmountChange}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="limit-field">
-                    <span class="native-label">Maximum</span>
-                    <div class="amount-cell">
-                        <span class="amount-symbol" aria-hidden="true">{presetCurrencySymbol}</span>
-                        <input
-                            type="number"
-                            class="amount-native-input"
-                            aria-label="Maximum amount"
-                            placeholder="No limit"
-                            value={maxAmount}
-                            min="0"
-                            step="1"
-                            oninput={handleMaxAmountChange}
-                        />
-                    </div>
-                </div>
+                <template lwc:if={minMaxError}>
+                    <p class="slds-form-error slds-var-m-top_x-small" role="alert">{minMaxError}</p>
+                </template>
             </div>
-            <template lwc:if={minMaxError}>
-                <p class="field-error" role="alert">{minMaxError}</p>
-            </template>
-        </section>
+        </div>
 
     </div>
 </template>

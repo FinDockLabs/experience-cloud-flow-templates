@@ -33,16 +33,20 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     @track _presetsOneTime   = makePresets('', DEFAULT_AMOUNTS_ONE_TIME);
     @track _presetsRecurring = makePresets('', DEFAULT_AMOUNTS_RECURRING);
 
-    _showOneTime      = true;
-    _showMonthly      = true;
+    _showOneTime = true;
+    _showMonthly = true;
     _defaultFrequency = 'oneTime';
-    _minAmount        = 1;
-    _maxAmount        = 0;
-    _defaultCurrency  = '';
-    _frequencyOpen    = true;
+    _minAmount = 1;
+    _maxAmount = 0;
+    _defaultCurrency = '';
+    _frequencyOpen = true;
 
     get frequencyOpen() {
         return this._frequencyOpen;
+    }
+
+    get frequencySectionClass() {
+        return this._frequencyOpen ? 'slds-section slds-is-open' : 'slds-section';
     }
 
     get frequencyChevronName() {

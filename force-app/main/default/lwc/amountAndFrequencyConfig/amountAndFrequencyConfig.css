@@ -1,157 +1,65 @@
-.cpe-root {
-    font-family: var(--slds-g-font-family-sans);
+:host {
+    --_border:        var(--slds-g-color-neutral-base-50,  var(--lwc-colorNeutral50,       #5c5c5c));
+    --_border-focus:  var(--slds-g-color-brand-base-40,    var(--lwc-colorBrand,            #0176d3));
+    --_text:          var(--slds-g-color-neutral-base-10,  var(--lwc-colorTextDefault,      #181818));
+    --_text-weak:     var(--slds-g-color-neutral-base-50,  var(--lwc-colorTextWeak,         #5c5c5c));
+    --_text-placeholder: var(--slds-g-color-neutral-base-60, var(--lwc-colorTextPlaceholder, #767474));
+    --_bg:            var(--slds-g-color-neutral-base-100, var(--lwc-colorBackground,       #ffffff));
 }
 
-/* ─── Flat section layout ────────────────────────────────────────────────── */
-
-.cpe-section {
-    padding: var(--slds-g-spacing-3) 0;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    margin-bottom: var(--slds-g-spacing-2);
-    text-align: left;
-}
-
-.section-header:focus-visible {
-    outline: 2px solid #0176D3;
-    outline-offset: 2px;
-    border-radius: 0.25rem;
-}
-
-.section-heading {
-    margin: 0;
-    font-size: var(--slds-g-font-scale-1, 0.875rem);
-    font-weight: 700;
-    color: var(--slds-g-color-neutral-base-10, #080707);
-    line-height: 1.25;
-}
-
-.section-desc {
-    margin: 0 0 var(--slds-g-spacing-2);
-    font-size: var(--slds-g-font-scale-neg-1);
-    color: var(--slds-g-color-neutral-base-50, #706e6b);
-    line-height: 1.4;
-}
-
-.section-rule {
-    margin: 0;
-    border: none;
-    border-top: 1px solid var(--slds-g-color-border-1, #dddbda);
-}
-
-
-/* ─── Preset amount sublabels ────────────────────────────────────────────── */
-
-.subsection-label {
-    margin: var(--slds-g-spacing-3) 0 var(--slds-g-spacing-1);
-    font-size: var(--slds-g-font-scale-neg-1);
-    color: var(--slds-g-color-neutral-base-50, #706e6b);
-}
-
-/* ─── Preset amounts grid (3 columns × 2 rows) ───────────────────────────── */
-
-.amounts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--slds-g-spacing-2);
-    margin-bottom: var(--slds-g-spacing-2);
-}
-
-/* ─── Shared amount input cell ($ prefix + native input) ─────────────────── */
-
-.amount-cell {
+/* Compact currency input: symbol + number inside a single border */
+.amount-input-group {
     display: flex;
     align-items: center;
-    height: 2rem;
-    border: 1px solid var(--slds-g-color-border-1, #dddbda);
+    height: 1.875rem;
+    border: 1px solid var(--_border);
     border-radius: 0.25rem;
-    background: #ffffff;
+    background: var(--_bg);
     overflow: hidden;
-    transition: border-color 0.15s ease;
 }
 
-.amount-cell:focus-within {
-    border-color: #0176D3;
-    box-shadow: 0 0 0 2px #0176D3;
-}
-
-.amount-native-input:focus-visible {
-    outline: 2px solid #0176D3;
-    outline-offset: 0;
+.amount-input-group:focus-within {
+    border-color: var(--_border-focus);
+    box-shadow: 0 0 0 1px var(--_border-focus);
 }
 
 .amount-symbol {
     flex-shrink: 0;
-    padding: 0 0.375rem 0 0.5rem;
-    font-size: var(--slds-g-font-scale-neg-1);
-    color: var(--slds-g-color-neutral-base-50, #706e6b);
+    padding: 0 0.25rem 0 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--_text-weak);
+    line-height: 1;
     user-select: none;
 }
 
-.amount-native-input {
-    flex: 1;
+.amount-input {
+    flex: 1 1 0;
     min-width: 0;
+    width: 100%;
     height: 100%;
-    border: 0;
+    border: none;
+    box-shadow: none;
     background: transparent;
-    padding: 0 0.375rem;
-    font-size: var(--slds-g-font-scale-neg-1);
-    font-family: var(--slds-g-font-family-sans);
-    color: var(--slds-g-color-neutral-base-10, #080707);
+    padding: 0 0.375rem 0 0;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    color: var(--_text);
     outline: none;
     -moz-appearance: textfield;
 }
 
-.amount-native-input::-webkit-outer-spin-button,
-.amount-native-input::-webkit-inner-spin-button {
+.amount-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.amount-input::placeholder {
+    color: var(--_text-placeholder);
+}
+
+/* Hide browser spinner buttons */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-}
-
-.amount-native-input::placeholder {
-    color: var(--slds-g-color-neutral-base-50, #706e6b);
-}
-
-/* ─── Other amount limits ─────────────────────────────────────────────────── */
-
-.limit-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--slds-g-spacing-3);
-    margin-bottom: var(--slds-g-spacing-1);
-}
-
-.limit-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--slds-g-spacing-1);
-}
-
-.native-label {
-    font-size: var(--slds-g-font-scale-neg-1);
-    font-weight: 700;
-    color: var(--slds-g-color-neutral-base-10, #080707);
-}
-
-/* ─── Spacing helper ─────────────────────────────────────────────────────── */
-
-.field-spacer {
-    margin-top: var(--slds-g-spacing-3);
-}
-
-/* ─── Validation errors ──────────────────────────────────────────────────── */
-
-.field-error {
-    margin: var(--slds-g-spacing-1) 0 0;
-    font-size: var(--slds-g-font-scale-neg-2);
-    color: var(--slds-g-color-error-base-50, #ba0517);
 }
