@@ -35,14 +35,6 @@
         <value>Minimum amount is {0}</value>
     </labels>
     <labels>
-        <fullName>ec_label_currency_selector</fullName>
-        <categories>Accessibility</categories>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Accessible label for the currency selector dropdown</shortDescription>
-        <value>Select currency</value>
-    </labels>
-    <labels>
         <fullName>ec_label_give_once</fullName>
         <categories>Experience Cloud</categories>
         <language>en_US</language>

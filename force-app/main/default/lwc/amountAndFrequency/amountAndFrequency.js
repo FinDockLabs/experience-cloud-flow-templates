@@ -93,7 +93,7 @@ export default class AmountAndFrequency extends LightningElement {
         try { return navigator.language || 'en-US'; } catch { return 'en-US'; }
     }
 
-    get frequencyGroupName() {
+    get frequencyGroupName(){
         return `frequency-${this._instanceId}`;
     }
 
@@ -186,13 +186,13 @@ export default class AmountAndFrequency extends LightningElement {
     }
 
     handleFrequencyChange(event) {
-        this._frequency       = event.target.value;
+        this._frequency = event.target.value;
         this._validationError = '';
         this._dispatchChange();
     }
 
     handlePresetAmountSelect(event) {
-        this._selectedPreset  = Number(event.target.value);
+        this._selectedPreset = Number(event.target.value);
         this._customAmount    = '';
         this._validationError = '';
         this._dispatchChange();
@@ -278,7 +278,6 @@ export default class AmountAndFrequency extends LightningElement {
     _dispatchChange() {
         const detail = {
             frequency:        this._frequency,
-            amount:           this._amount,
             amountOneTime:    this.amountOneTime,
             amountRecurring:  this.amountRecurring,
             selectedCurrency: this.defaultCurrency
