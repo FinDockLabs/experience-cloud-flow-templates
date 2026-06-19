@@ -26,10 +26,8 @@ export default class AmountAndFrequency extends LightningElement {
     @api freq2Label            = '';
     @api showFrequencyToggle   = false;
 
-    @api presetAmountsOneTime      = DEFAULT_AMOUNTS_ONE_TIME;
-    @api presetAmountsRecurring    = DEFAULT_AMOUNTS_RECURRING;
-    @api impactNarrativesOneTime   = '';
-    @api impactNarrativesRecurring = '';
+    @api presetAmountsOneTime   = DEFAULT_AMOUNTS_ONE_TIME;
+    @api presetAmountsRecurring = DEFAULT_AMOUNTS_RECURRING;
 
     @api minAmount       = 1;
     @api maxAmount       = null;
@@ -165,21 +163,13 @@ export default class AmountAndFrequency extends LightningElement {
     }
 
     get presetAmountOptions() {
-        const presets    = this._resolveActivePresets() || [];
-        const narratives = this._resolveActiveNarratives();
-        return presets.map((amount, idx) => ({
+        const presets = this._resolveActivePresets() || [];
+        return presets.map(amount => ({
             value:      amount,
             label:      this.formatPresetAmount(amount, this.defaultCurrency, this._locale),
             inputId:    `${this._instanceId}-preset-${amount}`,
-            narrative:  narratives[idx] || '',
             isSelected: this._selectedPreset === amount && this._customAmount === ''
         }));
-    }
-
-    get selectedPresetNarrative() {
-        if (this._customAmount !== '' || this._selectedPreset === null) return '';
-        const opt = this.presetAmountOptions.find(o => o.isSelected);
-        return opt ? opt.narrative : '';
     }
 
     get currencySymbol() {
@@ -253,11 +243,6 @@ export default class AmountAndFrequency extends LightningElement {
         return parsed.length > 0 ? parsed : null;
     }
 
-    parseNarratives(raw) {
-        if (!raw || !String(raw).trim()) return [];
-        return String(raw).split(';').map(s => s.trim());
-    }
-
     getCurrencySymbolInfo(currencyCode, locale) {
         try {
             const parts = new Intl.NumberFormat(locale, {
@@ -294,13 +279,6 @@ export default class AmountAndFrequency extends LightningElement {
             ? this.presetAmountsRecurring
             : this.presetAmountsOneTime;
         return this.parseAmounts(raw);
-    }
-
-    _resolveActiveNarratives() {
-        const raw = this._frequency === this.freq2Value
-            ? this.impactNarrativesRecurring
-            : this.impactNarrativesOneTime;
-        return this.parseNarratives(raw);
     }
 
     _validateAmount(num) {
