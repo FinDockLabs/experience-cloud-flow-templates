@@ -33,6 +33,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     @api automaticOutputVariables;
 
     _inputVariables = [];
+    _hydrated = false;
 
     @api
     get inputVariables() {
@@ -40,7 +41,10 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
     set inputVariables(value) {
         this._inputVariables = value;
-        this._hydrate();
+        if (!this._hydrated) {
+            this._hydrated = true;
+            this._hydrate();
+        }
     }
 
     @track _presetsOneTime   = makePresets('', DEFAULT_AMOUNTS_ONE_TIME);
@@ -264,7 +268,8 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     handleMaxAmountChange(event) {
-        const val = parseInt(event.target.value, 10);
+        const raw = event.target.value;
+        const val = raw === '' ? 0 : parseInt(raw, 10);
         if (!isNaN(val) && val >= 0) {
             this._maxAmount = val;
             this._emit('maxAmount', val, 'Number');
