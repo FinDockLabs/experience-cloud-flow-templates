@@ -84,7 +84,7 @@
     transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 
-/* Subtle hover tint — works on any theme, distinct from selected state */
+/* subtle hover tint, works on any theme, distinct from selected state */
 .visually-hidden-input:not(:checked) + .toggle-option:hover,
 .visually-hidden-input:not(:checked) + .amount-option:hover {
     background-color: color-mix(in srgb, var(--dxp-g-brand, var(--slds-g-color-brand-base-60)) 8%, transparent);

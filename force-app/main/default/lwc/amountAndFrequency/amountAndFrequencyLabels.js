@@ -6,7 +6,6 @@ import ec_label_other_amount from "@salesforce/label/c.ec_label_other_amount";
 import ec_label_currency_selector  from "@salesforce/label/c.ec_label_currency_selector";
 import ec_label_amount_min_error   from "@salesforce/label/c.ec_label_amount_min_error";
 import ec_label_amount_max_error   from "@salesforce/label/c.ec_label_amount_max_error";
-import ec_label_currency_not_configured   from "@salesforce/label/c.ec_label_currency_not_configured";
 
 const labels = {
     ec_label_donation_frequency,
@@ -17,7 +16,6 @@ const labels = {
     ec_label_currency_selector,
     ec_label_amount_min_error,
     ec_label_amount_max_error,
-    ec_label_currency_not_configured,
 };
 
 export { labels };

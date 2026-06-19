@@ -1,10 +1,6 @@
-// ─── Salesforce utilities ─────────────────────────────────────────────────────
 import { LightningElement, api } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
-// ─── Labels ───────────────────────────────────────────────────────────────────
 import { labels } from './amountAndFrequencyLabels';
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const DEFAULT_AMOUNTS_ONE_TIME  = '25,50,100,250,500,1000';
 const DEFAULT_AMOUNTS_RECURRING = '5,10,25,60,125,250';
@@ -14,17 +10,15 @@ const DEFAULT_FREQ_2_VALUE      = 'recurring';
 let _nextInstanceId = 0;
 
 export default class AmountAndFrequency extends LightningElement {
-    // ─── Properties ───────────────────────────────────────────────────────────
-    _instanceId              = ++_nextInstanceId;
-    _frequency               = DEFAULT_FREQ_1_VALUE;
+    _instanceId = ++_nextInstanceId;
+    _frequency = DEFAULT_FREQ_1_VALUE;
     _selectedPresetOneTime   = null;
     _selectedPresetRecurring = null;
-    _customAmount            = '';
+    _customAmount = '';
     _validationError         = '';
     _defaultCurrency         = '';
-    labels = labels;
 
-    // ─── @api ─────────────────────────────────────────────────────────────────
+    labels = labels;
 
     @api freq1Value            = DEFAULT_FREQ_1_VALUE;
     @api freq1Label            = '';
@@ -98,8 +92,6 @@ export default class AmountAndFrequency extends LightningElement {
     get selectedCurrency() {
         return this.defaultCurrency;
     }
-
-    // ─── Getters ──────────────────────────────────────────────────────────────
 
     // Routes preset read/write to the bucket that matches the active frequency.
     get _selectedPreset() {
@@ -219,7 +211,6 @@ export default class AmountAndFrequency extends LightningElement {
         return !!this._validationError;
     }
 
-    // ─── Lifecycle ────────────────────────────────────────────────────────────
     connectedCallback() {
         if (this.defaultFrequency) {
             this._frequency = this.defaultFrequency;
@@ -231,8 +222,6 @@ export default class AmountAndFrequency extends LightningElement {
     disconnectedCallback() {
         this._saveState();
     }
-
-    // ─── Event handlers ───────────────────────────────────────────────────────
 
     handleFrequencyChange(event) {
         this._frequency       = event.target.value;
@@ -254,8 +243,6 @@ export default class AmountAndFrequency extends LightningElement {
         this._validateAmount(Number(val));
         this._dispatchChange();
     }
-
-    // ─── Utility methods ──────────────────────────────────────────────────────
 
     parseAmounts(raw) {
         if (!raw || !String(raw).trim()) return null;
