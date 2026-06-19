@@ -20,10 +20,8 @@ export default class AmountAndFrequency extends LightningElement {
 
     labels = labels;
 
-    @api freq1Value            = DEFAULT_FREQ_1_VALUE;
-    @api freq1Label            = '';
-    @api freq2Value            = DEFAULT_FREQ_2_VALUE;
-    @api freq2Label            = '';
+    @api freq1Value = DEFAULT_FREQ_1_VALUE;
+    @api freq2Value = DEFAULT_FREQ_2_VALUE;
     @api showFrequencyToggle   = false;
 
     @api presetAmountsOneTime   = DEFAULT_AMOUNTS_ONE_TIME;
@@ -135,14 +133,6 @@ export default class AmountAndFrequency extends LightningElement {
 
     get customAmountErrorId() {
         return `custom-amount-error-${this._instanceId}`;
-    }
-
-    get displayFreq1Label() {
-        return this.freq1Label || this.labels.ec_label_give_once;
-    }
-
-    get displayFreq2Label() {
-        return this.freq2Label || this.labels.ec_label_monthly;
     }
 
     get isFreq1Selected() {

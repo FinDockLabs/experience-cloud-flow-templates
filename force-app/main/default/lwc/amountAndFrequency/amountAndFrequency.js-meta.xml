@@ -10,10 +10,8 @@
     <targetConfigs>
         <targetConfig targets="lightning__FlowScreen" configurationEditor="c-amount-and-frequency-config">
 
-            <property name="freq1Value"          type="String"  role="inputOnly" label="Frequency 1 — API value"      description="API value for the first frequency option."                                                        default="oneTime"/>
-            <property name="freq1Label"          type="String"  role="inputOnly" label="Frequency 1 — Display label"  description="Button label. Leave blank to use the default Custom Label (Give once)."                                            />
-            <property name="freq2Value"          type="String"  role="inputOnly" label="Frequency 2 — API value"      description="API value for the second frequency option."                                                       default="recurring"          />
-            <property name="freq2Label"          type="String"  role="inputOnly" label="Frequency 2 — Display label"  description="Button label. Leave blank to use the default Custom Label (Monthly)."                                              />
+            <property name="freq1Value" type="String" role="inputOnly" label="Frequency 1 — API value" description="API value for the first frequency option." default="oneTime"/>
+            <property name="freq2Value" type="String" role="inputOnly" label="Frequency 2 — API value" description="API value for the second frequency option." default="recurring"/>
             <property name="showFrequencyToggle" type="Boolean" role="inputOnly" label="Show frequency toggle"         description="Uncheck to hide the toggle and always submit frequency 1."                                       default="false"              />
 
             <property name="presetAmountsOneTime"      type="String"  role="inputOnly" label="Preset amounts — one-time (comma-separated)"          description="Up to 6 comma-separated numbers, e.g. 25,50,100,250,500,1000. Leave blank to hide the preset grid."  default="25,50,100,250,500,1000"  />
@@ -22,7 +20,7 @@
             <property name="maxAmount"                 type="Integer" role="inputOnly" label="Maximum amount (0 = none)"                             description="Maximum accepted value. Set to 0 for no limit."                                      default="0"               />
 
             <property name="defaultCurrency" type="String" role="inputOnly" label="Default currency code" description="ISO 4217 code passed in from the Currency Picker component, e.g. EUR." />
-            <property name="defaultFrequency"    type="String" role="inputOnly" label="Default frequency"                                 description="Frequency pre-selected when the component loads, e.g. oneTime or recurring."      />
+            <property name="defaultFrequency" type="String" role="inputOnly" label="Default frequency" description="Frequency pre-selected when the component loads, e.g. oneTime or recurring."      />
 
             <property name="frequency"        type="String"  label="Frequency"          description="API value of the selected frequency (matches freq1Value or freq2Value)."/>
             <property name="amount"           type="Integer" label="Amount"             description="Selected or entered amount (supports decimals, e.g. 10.50). Matches cpm:payButton input type."/>
