@@ -23,8 +23,7 @@
             <property name="defaultFrequency" type="String" role="inputOnly" label="Default frequency" description="Frequency pre-selected when the component loads, e.g. oneTime or recurring."      />
 
             <property name="frequency"        type="String"  label="Frequency"          description="API value of the selected frequency (matches freq1Value or freq2Value)."/>
-            <property name="amount"           type="Integer" label="Amount"             description="Selected or entered amount (supports decimals, e.g. 10.50). Matches cpm:payButton input type."/>
-            <property name="amountOneTime"    type="Integer" label="Amount — one-time"  description="Amount when frequency is one-time; null otherwise. Prefer Amount."/>
+            <property name="amountOneTime"    type="Integer" label="Amount — one-time"  description="Amount when frequency is one-time; null otherwise."/>
             <property name="amountRecurring"  type="Integer" label="Amount — recurring" description="Amount when frequency is recurring; null otherwise. Prefer Amount."/>
             <property name="selectedCurrency" type="String"  label="Selected currency"  description="ISO 4217 code of the currency chosen on the form."/>
         </targetConfig>

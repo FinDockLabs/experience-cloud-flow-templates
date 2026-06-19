@@ -28,7 +28,7 @@ export default class AmountAndFrequency extends LightningElement {
     @api presetAmountsRecurring = DEFAULT_AMOUNTS_RECURRING;
 
     @api minAmount       = 1;
-    @api maxAmount       = null;
+    @api maxAmount       = 0;
     @api defaultFrequency = '';
 
     @api
@@ -50,8 +50,7 @@ export default class AmountAndFrequency extends LightningElement {
         if (value) this._frequency = value;
     }
 
-    @api
-    get amount() {
+    get _amount() {
         if (this._customAmount !== '') {
             const n = Number(this._customAmount);
             return isNaN(n) ? null : n;
@@ -59,29 +58,16 @@ export default class AmountAndFrequency extends LightningElement {
         return this._selectedPreset;
     }
 
-    set amount(val) {
-        if (val !== undefined && val !== null) {
-            const presets = this._resolveActivePresets() || [];
-            if (presets.includes(Number(val))) {
-                this._selectedPreset = Number(val);
-                this._customAmount   = '';
-            } else {
-                this._customAmount   = String(val);
-                this._selectedPreset = null;
-            }
-        }
-    }
-
     @api
     get amountOneTime() {
         if (this._frequency !== 'oneTime') return null;
-        return this.amount;
+        return this._amount;
     }
 
     @api
     get amountRecurring() {
         if (this._frequency !== 'recurring') return null;
-        return this.amount;
+        return this._amount;
     }
 
     @api
@@ -105,10 +91,6 @@ export default class AmountAndFrequency extends LightningElement {
 
     get _locale() {
         try { return navigator.language || 'en-US'; } catch { return 'en-US'; }
-    }
-
-    get _symbolInfo() {
-        return this.getCurrencySymbolInfo(this.defaultCurrency, this._locale);
     }
 
     get frequencyGroupName() {
@@ -156,22 +138,22 @@ export default class AmountAndFrequency extends LightningElement {
         const presets = this._resolveActivePresets() || [];
         return presets.map(amount => ({
             value:      amount,
-            label:      this.formatPresetAmount(amount, this.defaultCurrency, this._locale),
+            label:      this._formatPresetAmount(amount, this.defaultCurrency, this._locale),
             inputId:    `${this._instanceId}-preset-${amount}`,
             isSelected: this._selectedPreset === amount && this._customAmount === ''
         }));
     }
 
     get currencySymbol() {
-        return this._symbolInfo.symbol;
+        return this._getCurrencySymbolInfo(this.defaultCurrency, this._locale).symbol;
     }
 
     get isCurrencyPrefix() {
-        return this._symbolInfo.position === 'prefix';
+        return this._getCurrencySymbolInfo(this.defaultCurrency, this._locale).position === 'prefix';
     }
 
     get isCurrencySuffix() {
-        return this._symbolInfo.position === 'suffix';
+        return this._getCurrencySymbolInfo(this.defaultCurrency, this._locale).position === 'suffix';
     }
 
     get customAmountMin() {
@@ -224,7 +206,7 @@ export default class AmountAndFrequency extends LightningElement {
         this._dispatchChange();
     }
 
-    parseAmounts(raw) {
+    _parseAmounts(raw) {
         if (!raw || !String(raw).trim()) return null;
         const parsed = String(raw)
             .split(',')
@@ -233,7 +215,7 @@ export default class AmountAndFrequency extends LightningElement {
         return parsed.length > 0 ? parsed : null;
     }
 
-    getCurrencySymbolInfo(currencyCode, locale) {
+    _getCurrencySymbolInfo(currencyCode, locale) {
         try {
             const parts = new Intl.NumberFormat(locale, {
                 style: 'currency',
@@ -251,7 +233,7 @@ export default class AmountAndFrequency extends LightningElement {
         }
     }
 
-    formatPresetAmount(amount, currencyCode, locale) {
+    _formatPresetAmount(amount, currencyCode, locale) {
         try {
             return new Intl.NumberFormat(locale, {
                 style: 'currency',
@@ -268,7 +250,7 @@ export default class AmountAndFrequency extends LightningElement {
         const raw = this._frequency === this.freq2Value
             ? this.presetAmountsRecurring
             : this.presetAmountsOneTime;
-        return this.parseAmounts(raw);
+        return this._parseAmounts(raw);
     }
 
     _validateAmount(num) {
@@ -281,12 +263,12 @@ export default class AmountAndFrequency extends LightningElement {
         if (isNaN(num) || num < min) {
             this._validationError = this.labels.ec_label_amount_min_error.replace(
                 '{0}',
-                this.formatPresetAmount(min, this.defaultCurrency, this._locale)
+                this._formatPresetAmount(min, this.defaultCurrency, this._locale)
             );
         } else if (max !== null && num > max) {
             this._validationError = this.labels.ec_label_amount_max_error.replace(
                 '{0}',
-                this.formatPresetAmount(max, this.defaultCurrency, this._locale)
+                this._formatPresetAmount(max, this.defaultCurrency, this._locale)
             );
         } else {
             this._validationError = '';
@@ -296,14 +278,13 @@ export default class AmountAndFrequency extends LightningElement {
     _dispatchChange() {
         const detail = {
             frequency:        this._frequency,
-            amount:           this.amount,
+            amount:           this._amount,
             amountOneTime:    this.amountOneTime,
             amountRecurring:  this.amountRecurring,
             selectedCurrency: this.defaultCurrency
         };
         this.dispatchEvent(new CustomEvent('amountfrequencychange', { detail }));
         this.dispatchEvent(new FlowAttributeChangeEvent('frequency',        detail.frequency));
-        this.dispatchEvent(new FlowAttributeChangeEvent('amount',           detail.amount));
         this.dispatchEvent(new FlowAttributeChangeEvent('amountOneTime',    detail.amountOneTime));
         this.dispatchEvent(new FlowAttributeChangeEvent('amountRecurring',  detail.amountRecurring));
         this.dispatchEvent(new FlowAttributeChangeEvent('selectedCurrency', detail.selectedCurrency));
