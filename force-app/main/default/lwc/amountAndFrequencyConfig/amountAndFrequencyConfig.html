@@ -2,22 +2,51 @@
     <div class="cpe-root">
         <!-- ── Frequency ──────────────────────────────────────────────────────── -->
         <section class="cpe-section">
-            <h3 class="section-heading">Frequency</h3>
-            <p class="section-desc">Toggle which frequencies appear.</p>
-            <div class="chip-group" role="group" aria-label="Frequency options">
-                <button type="button" class={oneTimeChipClass} onclick={handleShowOneTimeChange}>One-time</button>
-                <button type="button" class={monthlyChipClass} onclick={handleShowMonthlyChange}>Monthly</button>
-            </div>
-            <template lwc:if={frequencyError}>
-                <p class="field-error" role="alert">{frequencyError}</p>
-            </template>
-            <template lwc:if={showDefaultFrequency}>
-                <lightning-combobox
-                    label="Default frequency"
-                    value={defaultFrequency}
-                    options={frequencyOptions}
-                    onchange={handleDefaultFrequencyChange}
-                ></lightning-combobox>
+            <button type="button" class="section-header" onclick={handleToggleFrequency}>
+                <span class="section-heading">Frequency</span>
+                <lightning-icon
+                    icon-name={frequencyChevronName}
+                    size="xx-small"
+                    class="section-chevron"
+                ></lightning-icon>
+            </button>
+            <template lwc:if={frequencyOpen}>
+                <p class="section-desc">Choose which giving frequencies donors can pick. At least one is required.</p>
+
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <label class="slds-checkbox_toggle slds-grid slds-grid_vertical-align-center">
+                            <input type="checkbox" checked={showOneTime} onchange={handleShowOneTimeChange} />
+                            <span class="slds-checkbox_faux_container">
+                                <span class="slds-checkbox_faux"></span>
+                            </span>
+                            <span class="slds-form-element__label slds-m-bottom_none slds-p-left_small">One-time</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="slds-form-element slds-m-top_small">
+                    <div class="slds-form-element__control">
+                        <label class="slds-checkbox_toggle slds-grid slds-grid_vertical-align-center">
+                            <input type="checkbox" checked={showMonthly} onchange={handleShowMonthlyChange} />
+                            <span class="slds-checkbox_faux_container">
+                                <span class="slds-checkbox_faux"></span>
+                            </span>
+                            <span class="slds-form-element__label slds-m-bottom_none slds-p-left_small">Monthly</span>
+                        </label>
+                    </div>
+                </div>
+                <template lwc:if={frequencyError}>
+                    <p class="field-error" role="alert">{frequencyError}</p>
+                </template>
+                <template lwc:if={showDefaultFrequency}>
+                    <lightning-combobox
+                        label="Default frequency"
+                        value={defaultFrequency}
+                        options={frequencyOptions}
+                        onchange={handleDefaultFrequencyChange}
+                    ></lightning-combobox>
+                </template>
             </template>
         </section>
 

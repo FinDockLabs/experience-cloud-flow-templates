@@ -39,6 +39,15 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     _minAmount        = 1;
     _maxAmount        = 0;
     _defaultCurrency  = '';
+    _frequencyOpen    = true;
+
+    get frequencyOpen() {
+        return this._frequencyOpen;
+    }
+
+    get frequencyChevronName() {
+        return this._frequencyOpen ? 'utility:chevrondown' : 'utility:chevronright';
+    }
 
     get showOneTime() {
         return this._showOneTime;
@@ -54,14 +63,6 @@ export default class AmountAndFrequencyConfig extends LightningElement {
 
     get maxAmount() {
         return this._maxAmount === 0 ? '' : this._maxAmount;
-    }
-
-    get oneTimeChipClass() {
-        return `chip-btn${this._showOneTime ? ' chip-btn-active' : ''}`;
-    }
-
-    get monthlyChipClass() {
-        return `chip-btn${this._showMonthly ? ' chip-btn-active' : ''}`;
     }
 
     get frequencyOptions() {
@@ -114,14 +115,18 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         this._autoBindCurrency();
     }
 
-    handleShowOneTimeChange() {
-        this._showOneTime = !this._showOneTime;
+    handleToggleFrequency() {
+        this._frequencyOpen = !this._frequencyOpen;
+    }
+
+    handleShowOneTimeChange(event) {
+        this._showOneTime = event.target.checked;
         if (!this._showOneTime && this._defaultFrequency === 'oneTime') this._defaultFrequency = 'recurring';
         this._emitFrequencyConfig();
     }
 
-    handleShowMonthlyChange() {
-        this._showMonthly = !this._showMonthly;
+    handleShowMonthlyChange(event) {
+        this._showMonthly = event.target.checked;
         if (!this._showMonthly && this._defaultFrequency === 'recurring') this._defaultFrequency = 'oneTime';
         this._emitFrequencyConfig();
     }
