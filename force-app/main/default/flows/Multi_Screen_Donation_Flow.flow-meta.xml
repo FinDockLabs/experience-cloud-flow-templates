@@ -204,7 +204,7 @@
             <inputParameters>
                 <name>defaultFrequency</name>
                 <value>
-                    <stringValue>recurring</stringValue>
+                    <stringValue>oneTime</stringValue>
                 </value>
             </inputParameters>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>

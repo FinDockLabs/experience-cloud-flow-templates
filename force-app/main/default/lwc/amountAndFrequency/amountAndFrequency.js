@@ -1,6 +1,7 @@
 import { LightningElement, api } from 'lwc';
 import { FlowAttributeChangeEvent } from 'lightning/flowSupport';
 import { labels } from './amountAndFrequencyLabels';
+import LOCALE from '@salesforce/i18n/locale';
 
 const DEFAULT_AMOUNTS_ONE_TIME  = '25,50,100,250,500,1000';
 const DEFAULT_AMOUNTS_RECURRING = '5,10,25,60,125,250';
@@ -90,7 +91,7 @@ export default class AmountAndFrequency extends LightningElement {
     }
 
     get _locale() {
-        try { return navigator.language || 'en-US'; } catch { return 'en-US'; }
+        return LOCALE ? LOCALE.replace('_', '-') : 'en-US';
     }
 
     get frequencyGroupName(){
@@ -216,6 +217,7 @@ export default class AmountAndFrequency extends LightningElement {
             const parts = new Intl.NumberFormat(locale, {
                 style: 'currency',
                 currency: currencyCode,
+                currencyDisplay: 'narrowSymbol',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).formatToParts(0);
@@ -234,6 +236,7 @@ export default class AmountAndFrequency extends LightningElement {
             return new Intl.NumberFormat(locale, {
                 style: 'currency',
                 currency: currencyCode,
+                currencyDisplay: 'narrowSymbol',
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).format(amount);

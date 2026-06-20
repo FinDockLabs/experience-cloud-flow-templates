@@ -130,9 +130,6 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         return this._getCurrencySymbol(this._defaultCurrency);
     }
 
-    connectedCallback() {
-        this._autoBindCurrency();
-    }
 
     _sanitizePresetAmount(event) {
         const raw = event.target.value;
@@ -170,22 +167,6 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         this._presetsRecurring = makePresets(get('presetAmountsRecurring'), DEFAULT_AMOUNTS_RECURRING);
     }
 
-    _autoBindCurrency() {
-        if (!this.builderContext || !this.builderContext.screenComponents) return;
-
-        const picker = this.builderContext.screenComponents.find(comp => {
-            const name = (comp.name || '').toLowerCase();
-            return name === 'currencypicklist' || name === 'selectedcurrency';
-        });
-
-        if (picker) {
-            if (picker.value && typeof picker.value === 'string' && !picker.value.includes('{')) {
-                this._defaultCurrency = picker.value;
-            }
-
-            this._emit('defaultCurrency', picker.name, 'Expression');
-        }
-    }
 
     _emitFrequencyConfig() {
         if (this._showOneTime && this._showMonthly) {
@@ -208,7 +189,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         if (!code) return '';
         try {
             const parts = new Intl.NumberFormat('en-US', {
-                style: 'currency', currency: code, minimumFractionDigits: 0
+                style: 'currency', currency: code, currencyDisplay: 'narrowSymbol', minimumFractionDigits: 0
             }).formatToParts(0);
             const sym = parts.find(p => p.type === 'currency');
             return sym ? sym.value : code;
