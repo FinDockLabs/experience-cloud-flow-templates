@@ -145,7 +145,7 @@
             <defaultValue>
                 <elementReference>DefaultCurrencyCode</elementReference>
             </defaultValue>
-            <fieldText>Choose the currency</fieldText>
+            <fieldText>Currency</fieldText>
             <fieldType>DropdownBox</fieldType>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>true</isRequired>
@@ -154,7 +154,7 @@
                     <stringValue>top</stringValue>
                 </verticalAlignment>
                 <width>
-                    <stringValue>12</stringValue>
+                    <stringValue>4</stringValue>
                 </width>
             </styleProperties>
         </fields>
