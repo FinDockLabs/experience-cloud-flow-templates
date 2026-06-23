@@ -40,6 +40,17 @@ export default class AmountAndFrequency extends LightningElement {
         const next = value || '';
         if (this._defaultCurrency === next) return;
         this._defaultCurrency = next;
+        // Clear custom amount if it has more decimal places than the new currency allows.
+        // Rounding or truncating silently would change the payment amount without user awareness,
+        // which is unacceptable for a payment form — the user must re-enter the amount explicitly.
+        if (this._customAmount !== '') {
+            const dotIdx = this._customAmount.indexOf('.');
+            const decimals = this._currencyDecimals;
+            if (dotIdx !== -1 && this._customAmount.length - dotIdx - 1 > decimals) {
+                this._customAmount = '';
+                this._dispatchChange();
+            }
+        }
         this.dispatchEvent(new FlowAttributeChangeEvent('selectedCurrency', next));
     }
 
@@ -62,13 +73,15 @@ export default class AmountAndFrequency extends LightningElement {
     @api
     get amountOneTime() {
         if (this._frequency !== 'oneTime') return null;
-        return this._amount;
+        const amt = this._amount;
+        return amt !== null ? String(amt) : null;
     }
 
     @api
     get amountRecurring() {
         if (this._frequency !== 'recurring') return null;
-        return this._amount;
+        const amt = this._amount;
+        return amt !== null ? String(amt) : null;
     }
 
     @api
@@ -162,6 +175,17 @@ export default class AmountAndFrequency extends LightningElement {
         return n > 0 ? n : null;
     }
 
+    get _currencyDecimals() {
+        try {
+            return new Intl.NumberFormat(this._locale, {
+                style: 'currency',
+                currency: this.defaultCurrency
+            }).resolvedOptions().maximumFractionDigits;
+        } catch {
+            return 2;
+        }
+    }
+
     get validationError() {
         return this._validationError;
     }
@@ -196,7 +220,21 @@ export default class AmountAndFrequency extends LightningElement {
     }
 
     handleCustomAmountInput(event) {
-        const val            = event.target.value;
+        let val = event.target.value;
+        val = val.replace(',', '.');
+        val = val.replace(/[^0-9.]/g, '');
+        const firstDot = val.indexOf('.');
+        if (firstDot !== -1) {
+            val = val.substring(0, firstDot + 1) + val.substring(firstDot + 1).replace(/\./g, '');
+        }
+        const decimals = this._currencyDecimals;
+        const dotIdx = val.indexOf('.');
+        if (decimals === 0 && dotIdx !== -1) {
+            val = val.substring(0, dotIdx);
+        } else if (decimals > 0 && dotIdx !== -1 && val.length - dotIdx - 1 > decimals) {
+            val = val.substring(0, dotIdx + decimals + 1);
+        }
+        event.target.value = val;
         this._customAmount   = val;
         this._selectedPreset = val !== '' ? null : this._selectedPreset;
         this._validateAmount(Number(val));

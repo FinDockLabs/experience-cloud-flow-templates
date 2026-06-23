@@ -72,14 +72,13 @@
                 </template>
 
                 <input
-                    type="number"
+                    type="text"
+                    inputmode="decimal"
+                    autocomplete="transaction-amount"
                     id={customAmountId}
                     class="custom-amount-input-native"
                     placeholder={labels.ec_label_other_amount}
                     value={_customAmount}
-                    min={customAmountMin}
-                    max={customAmountMax}
-                    step="any"
                     aria-describedby={customAmountErrorId}
                     aria-invalid={hasValidationError}
                     oninput={handleCustomAmountInput}
