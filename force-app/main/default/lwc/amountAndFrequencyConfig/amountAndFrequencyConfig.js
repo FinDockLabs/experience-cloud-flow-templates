@@ -56,19 +56,6 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     _minAmount = 1;
     _maxAmount = 0;
     _defaultCurrency = '';
-    _frequencyOpen = true;
-
-    get frequencyOpen() {
-        return this._frequencyOpen;
-    }
-
-    get frequencySectionClass() {
-        return this._frequencyOpen ? 'slds-section slds-is-open' : 'slds-section';
-    }
-
-    get frequencyChevronName() {
-        return this._frequencyOpen ? 'utility:chevrondown' : 'utility:chevronright';
-    }
 
     get showOneTime() {
         return this._showOneTime;
@@ -203,10 +190,6 @@ export default class AmountAndFrequencyConfig extends LightningElement {
             bubbles: true, composed: true,
             detail: { name, newValue, newValueDataType }
         }));
-    }
-
-    handleToggleFrequency() {
-        this._frequencyOpen = !this._frequencyOpen;
     }
 
     handleShowOneTimeChange(event) {
