@@ -224,11 +224,11 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     handleMinAmountChange(event) {
-        const val = parseInt(event.target.value, 10);
-        if (!isNaN(val) && val >= 0) {
-            this._minAmount = val;
-            this._emit('minAmount', val, 'Number');
-        }
+        const raw = parseInt(event.target.value, 10);
+        const val = (isNaN(raw) || raw < 1) ? 1 : raw;
+        event.target.value = val;
+        this._minAmount = val;
+        this._emit('minAmount', val, 'Number');
     }
 
     handleMaxAmountChange(event) {
