@@ -96,6 +96,12 @@
             <name>amountAndFrequency</name>
             <extensionName>c:amountAndFrequency</extensionName>
             <fieldType>ComponentInstance</fieldType>
+            <inputParameters>
+                <name>defaultCurrency</name>
+                <value>
+                    <stringValue>EUR</stringValue>
+                </value>
+            </inputParameters>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>true</isRequired>
             <storeOutputAutomatically>true</storeOutputAutomatically>
