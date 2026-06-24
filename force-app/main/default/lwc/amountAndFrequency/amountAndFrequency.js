@@ -194,12 +194,50 @@ export default class AmountAndFrequency extends LightningElement {
         return !!this._validationError;
     }
 
+    get customAmountRowClass() {
+        return this._validationError
+            ? 'custom-amount-row custom-amount-row--error'
+            : 'custom-amount-row';
+    }
+
+    @api validate() {
+        // If no cached error but a custom amount exists, re-compute — this handles the case
+        // where the component re-mounted (clearing _validationError) while _customAmount was
+        // restored from sessionStorage.
+        if (!this._validationError && this._customAmount !== '') {
+            this._validateAmount(Number(this._customAmount));
+        }
+
+        if (this._validationError) {
+            return {
+                isValid: false,
+                /*
+                 * Use a zero-width space (\u200B) to block Salesforce Flow navigation.
+                 * Returning the actual error string causes the Flow runtime to render a static,
+                 * duplicate error message outside our component that fails to clear when the
+                 * user empties the input. The zero-width space satisfies the Flow engine's
+                 * requirement for an errorMessage while letting our custom, reactive inline
+                 * error handle the UI cleanly.
+                 */
+                errorMessage: '\u200B'
+            };
+        }
+
+        return { isValid: true };
+    }
+
     connectedCallback() {
         if (this.defaultFrequency) {
             this._frequency = this.defaultFrequency;
         }
         this._restoreState();
         this._applyQueryParams();
+
+        // If a state was restored from sessionStorage, immediately evaluate
+        // validation to prevent layout shifts or flashing of error styles.
+        if (this._customAmount !== '') {
+            this._validateAmount(Number(this._customAmount));
+        }
     }
 
     disconnectedCallback() {

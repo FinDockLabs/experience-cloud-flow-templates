@@ -63,7 +63,7 @@
         <!-- Custom Amount Input Row -->
         <div class="custom-amount-field">
             <label for={customAmountId} class="slds-assistive-text">{labels.ec_label_other_amount}</label>
-            <div class="custom-amount-row">
+            <div class={customAmountRowClass}>
 
                 <template lwc:if={isCurrencyPrefix}>
                     <span class="currency-adornment currency-adornment-prefix" aria-hidden="true">
