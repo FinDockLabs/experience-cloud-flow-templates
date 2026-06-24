@@ -2,22 +2,9 @@
     <div class="slds-var-p-around_small">
 
         <!-- ── Frequency ──────────────────────────────────────────────────────── -->
-        <div class={frequencySectionClass}>
+        <div class="slds-section slds-is-open">
             <h3 class="slds-section__title">
-                <button
-                    type="button"
-                    class="slds-button slds-section__title-action"
-                    aria-expanded={frequencyOpen}
-                    onclick={handleToggleFrequency}
-                >
-                    <lightning-icon
-                        icon-name={frequencyChevronName}
-                        size="x-small"
-                        class="slds-button__icon slds-button__icon_left"
-                        aria-hidden="true"
-                    ></lightning-icon>
-                    <span class="slds-truncate" title="Frequency">Frequency</span>
-                </button>
+                <span class="slds-truncate" title="Frequency">Frequency</span>
             </h3>
             <div class="slds-section__content slds-var-p-top_x-small">
                 <p class="slds-text-body_small slds-text-color_weak slds-var-m-bottom_small">
@@ -49,7 +36,7 @@
                 </div>
 
                 <template lwc:if={frequencyError}>
-                    <p class="slds-form-error slds-var-m-top_x-small" role="alert">{frequencyError}</p>
+                    <p class="form-error" role="alert">{frequencyError}</p>
                 </template>
 
                 <template lwc:if={showDefaultFrequency}>
@@ -70,7 +57,7 @@
         <!-- ── Preset Amounts ──────────────────────────────────────────────────── -->
         <div class="slds-section slds-is-open">
             <h3 class="slds-section__title">
-                <span class="slds-truncate slds-var-p-horizontal_small" title="Preset amounts">Preset amounts</span>
+                <span class="slds-truncate" title="Preset amounts">Preset amounts</span>
             </h3>
             <div class="slds-section__content slds-var-p-top_x-small">
 
@@ -131,10 +118,27 @@
 
         <hr class="slds-var-m-vertical_x-small" />
 
+        <!-- ── Currency ──────────────────────────────────────────────────────── -->
+        <cpm-flow-field-set label="Currency" description="Enter an ISO 4217 code (e.g. EUR) or select a flow variable that provides the currency at runtime.">
+            <cpm-flow-variable-input
+                name="defaultCurrency"
+                label="Currency"
+                variant="label-hidden"
+                builder-context-filter-type="String"
+                value={defaultCurrencyValue}
+                value-type={defaultCurrencyValueType}
+                builder-context={builderContext}
+                automatic-output-variables={automaticOutputVariables}
+                onvaluechange={handleCurrencyChange}>
+            </cpm-flow-variable-input>
+        </cpm-flow-field-set>
+
+        <hr class="slds-var-m-vertical_x-small" />
+
         <!-- ── Other Amount ────────────────────────────────────────────────────── -->
         <div class="slds-section slds-is-open">
             <h3 class="slds-section__title">
-                <span class="slds-truncate slds-var-p-horizontal_small" title="Other amount">Other amount</span>
+                <span class="slds-truncate" title="Other amount">Other amount</span>
             </h3>
             <div class="slds-section__content slds-var-p-top_x-small">
                 <div class="slds-grid slds-gutters_small">
@@ -149,11 +153,12 @@
                                     class="amount-input"
                                     aria-label="Minimum amount"
                                     value={minAmount}
-                                    min="0"
+                                    min="1"
                                     step="1"
-                                    oninput={handleMinAmountChange}
+                                    onchange={handleMinAmountChange}
                                 />
                             </div>
+                            <p class="form-hint">Must be at least 1</p>
                         </div>
                     </div>
                     <div class="slds-col slds-size_1-of-2">
@@ -170,14 +175,14 @@
                                     value={maxAmount}
                                     min="0"
                                     step="1"
-                                    oninput={handleMaxAmountChange}
+                                    onchange={handleMaxAmountChange}
                                 />
                             </div>
                         </div>
                     </div>
                 </div>
                 <template lwc:if={minMaxError}>
-                    <p class="slds-form-error slds-var-m-top_x-small" role="alert">{minMaxError}</p>
+                    <p class="form-error" role="alert">{minMaxError}</p>
                 </template>
             </div>
         </div>

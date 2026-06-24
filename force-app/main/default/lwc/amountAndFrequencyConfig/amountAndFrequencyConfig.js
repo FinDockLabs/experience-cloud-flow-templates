@@ -55,20 +55,8 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     _defaultFrequency = 'oneTime';
     _minAmount = 1;
     _maxAmount = 0;
-    _defaultCurrency = '';
-    _frequencyOpen = true;
-
-    get frequencyOpen() {
-        return this._frequencyOpen;
-    }
-
-    get frequencySectionClass() {
-        return this._frequencyOpen ? 'slds-section slds-is-open' : 'slds-section';
-    }
-
-    get frequencyChevronName() {
-        return this._frequencyOpen ? 'utility:chevrondown' : 'utility:chevronright';
-    }
+    _defaultCurrencyValue = '';
+    _defaultCurrencyValueType = 'String';
 
     get showOneTime() {
         return this._showOneTime;
@@ -123,11 +111,20 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         return max > 0 && min > max ? 'Minimum cannot be greater than maximum.' : '';
     }
 
+    get defaultCurrencyValue() {
+        return this._defaultCurrencyValue;
+    }
+
+    get defaultCurrencyValueType() {
+        return this._defaultCurrencyValueType;
+    }
+
     get presetCurrencySymbol() {
-        if (!this._defaultCurrency || this._defaultCurrency.includes('{')) {
-            return '';
+        const val = this._defaultCurrencyValue;
+        if (val && /^[A-Z]{3}$/.test(val)) {
+            return this._getCurrencySymbol(val);
         }
-        return this._getCurrencySymbol(this._defaultCurrency);
+        return this._getCurrencySymbol(CURRENCY || '');
     }
 
 
@@ -160,8 +157,14 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         this._defaultFrequency = get('defaultFrequency') ?? 'oneTime';
         this._minAmount        = get('minAmount')        ?? 1;
         this._maxAmount        = get('maxAmount')        ?? 0;
-        const rawCurrency = get('defaultCurrency') ?? '';
-        this._defaultCurrency = /^[A-Z]{3}$/.test(rawCurrency) ? rawCurrency : (CURRENCY || '');
+        const currencyVar = vars.find(x => x.name === 'defaultCurrency');
+        if (currencyVar != null) {
+            this._defaultCurrencyValue = currencyVar.value ?? '';
+            this._defaultCurrencyValueType = currencyVar.valueDataType ?? 'String';
+        } else {
+            this._defaultCurrencyValue = CURRENCY || '';
+            this._defaultCurrencyValueType = 'String';
+        }
 
         this._presetsOneTime   = makePresets(get('presetAmountsOneTime'),   DEFAULT_AMOUNTS_ONE_TIME);
         this._presetsRecurring = makePresets(get('presetAmountsRecurring'), DEFAULT_AMOUNTS_RECURRING);
@@ -205,10 +208,6 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         }));
     }
 
-    handleToggleFrequency() {
-        this._frequencyOpen = !this._frequencyOpen;
-    }
-
     handleShowOneTimeChange(event) {
         this._showOneTime = event.target.checked;
         if (!this._showOneTime && this._defaultFrequency === 'oneTime') this._defaultFrequency = 'recurring';
@@ -241,11 +240,11 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     handleMinAmountChange(event) {
-        const val = parseInt(event.target.value, 10);
-        if (!isNaN(val) && val >= 0) {
-            this._minAmount = val;
-            this._emit('minAmount', val, 'Number');
-        }
+        const raw = parseInt(event.target.value, 10);
+        const val = (isNaN(raw) || raw < 1) ? 1 : raw;
+        event.target.value = val;
+        this._minAmount = val;
+        this._emit('minAmount', val, 'Number');
     }
 
     handleMaxAmountChange(event) {
@@ -255,5 +254,14 @@ export default class AmountAndFrequencyConfig extends LightningElement {
             this._maxAmount = val;
             this._emit('maxAmount', val, 'Number');
         }
+    }
+
+    handleCurrencyChange(event) {
+        const type = event.detail.newValueDataType ?? 'String';
+        const raw  = event.detail.newValue ?? '';
+        const val  = type === 'String' ? raw.toUpperCase() : raw;
+        this._defaultCurrencyValue     = val;
+        this._defaultCurrencyValueType = type;
+        this._emit('defaultCurrency', val, type);
     }
 }
