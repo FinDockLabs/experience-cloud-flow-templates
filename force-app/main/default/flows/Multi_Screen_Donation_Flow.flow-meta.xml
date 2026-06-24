@@ -153,7 +153,7 @@
             <choiceReferences>ActiveCurrencies</choiceReferences>
             <dataType>String</dataType>
             <defaultValue>
-                <elementReference>DefaultCurrencyCode</elementReference>
+                <elementReference>UserCurrencyCode</elementReference>
             </defaultValue>
             <fieldText>Currency</fieldText>
             <fieldType>RadioButtons</fieldType>
@@ -607,7 +607,7 @@
         <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>User</object>
         <outputAssignments>
-            <assignToReference>DefaultCurrencyCode</assignToReference>
+            <assignToReference>UserCurrencyCode</assignToReference>
             <field>DefaultCurrencyIsoCode</field>
         </outputAssignments>
     </recordLookups>
@@ -620,7 +620,7 @@
     </start>
     <status>Draft</status>
     <variables>
-        <name>DefaultCurrencyCode</name>
+        <name>UserCurrencyCode</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>
