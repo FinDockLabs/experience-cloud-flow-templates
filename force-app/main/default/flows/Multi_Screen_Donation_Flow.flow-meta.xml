@@ -54,15 +54,6 @@
             <stringValue>{&quot;location&quot;:&quot;top&quot;,&quot;type&quot;:&quot;simple&quot;}</stringValue>
         </value>
     </customProperties>
-    <dynamicChoiceSets>
-        <name>ActiveCurrencies</name>
-        <dataType>Picklist</dataType>
-        <picklistField>CurrencyIsoCode</picklistField>
-        <picklistObject>cpm__Installment__c</picklistObject>
-        <displayField xsi:nil="true"/>
-        <object xsi:nil="true"/>
-        <sortOrder>Asc</sortOrder>
-    </dynamicChoiceSets>
     <environments>Default</environments>
     <formulas>
         <name>AmountOneTimeNum</name>
@@ -149,26 +140,6 @@
             </styleProperties>
         </fields>
         <fields>
-            <name>SelectedCurrency</name>
-            <choiceReferences>ActiveCurrencies</choiceReferences>
-            <dataType>String</dataType>
-            <defaultValue>
-                <elementReference>UserCurrencyCode</elementReference>
-            </defaultValue>
-            <fieldText>Currency</fieldText>
-            <fieldType>RadioButtons</fieldType>
-            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
-            <isRequired>true</isRequired>
-            <styleProperties>
-                <verticalAlignment>
-                    <stringValue>top</stringValue>
-                </verticalAlignment>
-                <width>
-                    <stringValue>4</stringValue>
-                </width>
-            </styleProperties>
-        </fields>
-        <fields>
             <name>amountAndFrequency</name>
             <extensionName>c:amountAndFrequency</extensionName>
             <fieldType>ComponentInstance</fieldType>
@@ -205,7 +176,7 @@
             <inputParameters>
                 <name>defaultCurrency</name>
                 <value>
-                    <elementReference>SelectedCurrency</elementReference>
+                    <stringValue>EUR</stringValue>
                 </value>
             </inputParameters>
             <inputParameters>
@@ -456,7 +427,7 @@
             <inputParameters>
                 <name>pixConfig</name>
                 <value>
-                    <stringValue>{&quot;payer&quot;:{&quot;contactObject&quot;:{&quot;name&quot;:&quot;payerContactVarName&quot;,&quot;value&quot;:&quot;{!Contact_Record}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}},&quot;paymentMethod&quot;:{&quot;name&quot;:&quot;paymentMethodObjectVar&quot;,&quot;value&quot;:&quot;{!Payment_Method_Selector.context}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;oneTime&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;oneTimeAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountOneTime}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;oneTimeCurrencyVar&quot;,&quot;value&quot;:&quot;{!SelectedCurrency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}}},&quot;recurring&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;recurringAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountRecurring}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;recurringCurrencyVar&quot;,&quot;value&quot;:&quot;{!SelectedCurrency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;frequency&quot;:{&quot;name&quot;:&quot;recurringFrequencyVar&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.frequency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}}},&quot;successUrl&quot;:{&quot;name&quot;:&quot;successUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/success&quot;,&quot;valueDataType&quot;:&quot;String&quot;},&quot;failureUrl&quot;:{&quot;name&quot;:&quot;failureUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/failure&quot;,&quot;valueDataType&quot;:&quot;String&quot;}}</stringValue>
+                    <stringValue>{&quot;payer&quot;:{&quot;contactObject&quot;:{&quot;name&quot;:&quot;payerContactVarName&quot;,&quot;value&quot;:&quot;{!Contact_Record}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}},&quot;paymentMethod&quot;:{&quot;name&quot;:&quot;paymentMethodObjectVar&quot;,&quot;value&quot;:&quot;{!Payment_Method_Selector.context}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;oneTime&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;oneTimeAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountOneTime}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;oneTimeCurrencyVar&quot;,&quot;value&quot;:&quot;EUR&quot;,&quot;valueDataType&quot;:&quot;String&quot;}}},&quot;recurring&quot;:{&quot;valueDataType&quot;:&quot;Object&quot;,&quot;value&quot;:{&quot;amount&quot;:{&quot;name&quot;:&quot;recurringAmount&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.amountRecurring}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;},&quot;currencyIsoCode&quot;:{&quot;name&quot;:&quot;recurringCurrencyVar&quot;,&quot;value&quot;:&quot;EUR&quot;,&quot;valueDataType&quot;:&quot;String&quot;},&quot;frequency&quot;:{&quot;name&quot;:&quot;recurringFrequencyVar&quot;,&quot;value&quot;:&quot;{!amountAndFrequency.frequency}&quot;,&quot;valueDataType&quot;:&quot;reference&quot;}}},&quot;successUrl&quot;:{&quot;name&quot;:&quot;successUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/success&quot;,&quot;valueDataType&quot;:&quot;String&quot;},&quot;failureUrl&quot;:{&quot;name&quot;:&quot;failureUrl&quot;,&quot;value&quot;:&quot;https://www.example.com/failure&quot;,&quot;valueDataType&quot;:&quot;String&quot;}}</stringValue>
                 </value>
             </inputParameters>
             <inputParameters>
@@ -587,45 +558,14 @@
         <showFooter>true</showFooter>
         <showHeader>false</showHeader>
     </screens>
-    <recordLookups>
-        <name>Get_User_Currency</name>
-        <label>Get User Currency</label>
-        <locationX>0</locationX>
-        <locationY>0</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>Amount_Screen</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Id</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>$User.Id</elementReference>
-            </value>
-        </filters>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>User</object>
-        <outputAssignments>
-            <assignToReference>UserCurrencyCode</assignToReference>
-            <field>DefaultCurrencyIsoCode</field>
-        </outputAssignments>
-    </recordLookups>
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Get_User_Currency</targetReference>
+            <targetReference>Amount_Screen</targetReference>
         </connector>
     </start>
     <status>Draft</status>
-    <variables>
-        <name>UserCurrencyCode</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-    </variables>
     <variables>
         <name>Contact_Record</name>
         <dataType>SObject</dataType>
