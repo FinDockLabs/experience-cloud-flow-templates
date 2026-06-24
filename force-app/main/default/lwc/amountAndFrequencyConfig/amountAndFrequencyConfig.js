@@ -128,12 +128,39 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
 
+    get _currencyDecimals() {
+        const code = this._defaultCurrencyValue || CURRENCY || '';
+        try {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).resolvedOptions().maximumFractionDigits;
+        } catch {
+            return 2;
+        }
+    }
+
+    _sanitizeConfigAmountInput(event) {
+        let val = event.target.value;
+        val = val.replace(',', '.');
+        val = val.replace(/[^0-9.]/g, '');
+        const firstDot = val.indexOf('.');
+        if (firstDot !== -1) {
+            val = val.substring(0, firstDot + 1) + val.substring(firstDot + 1).replace(/\./g, '');
+        }
+        const decimals = this._currencyDecimals;
+        const dotIdx = val.indexOf('.');
+        if (decimals === 0 && dotIdx !== -1) {
+            val = val.substring(0, dotIdx);
+        } else if (decimals > 0 && dotIdx !== -1 && val.length - dotIdx - 1 > decimals) {
+            val = val.substring(0, dotIdx + decimals + 1);
+        }
+        event.target.value = val;
+        return val;
+    }
+
     _sanitizePresetAmount(event) {
-        const raw = event.target.value;
-        if (raw === '') return '';
-        const num = Number(raw);
-        if (num < 0) { event.target.value = ''; return ''; }
-        return num;
+        const val = this._sanitizeConfigAmountInput(event);
+        if (val === '' || val === '.') return '';
+        const num = Number(val);
+        return isNaN(num) ? '' : num;
     }
 
     _hydrate() {
@@ -239,17 +266,29 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         this._emit('presetAmountsRecurring', toAmountString(this._presetsRecurring));
     }
 
+    handleMinAmountInput(event) {
+        this._sanitizeConfigAmountInput(event);
+    }
+
     handleMinAmountChange(event) {
-        const raw = parseInt(event.target.value, 10);
-        const val = (isNaN(raw) || raw < 1) ? 1 : raw;
-        event.target.value = val;
-        this._minAmount = val;
-        this._emit('minAmount', val, 'Number');
+        const raw = event.target.value;
+        const parsed = parseFloat(raw);
+        if (!isNaN(parsed) && parsed > 0) {
+            this._minAmount = parsed;
+            this._emit('minAmount', parsed, 'Number');
+        } else if (raw === '') {
+            this._minAmount = 0;
+            this._emit('minAmount', 0, 'Number');
+        }
+    }
+
+    handleMaxAmountInput(event) {
+        this._sanitizeConfigAmountInput(event);
     }
 
     handleMaxAmountChange(event) {
         const raw = event.target.value;
-        const val = raw === '' ? 0 : parseInt(raw, 10);
+        const val = raw === '' ? 0 : parseFloat(raw);
         if (!isNaN(val) && val >= 0) {
             this._maxAmount = val;
             this._emit('maxAmount', val, 'Number');
