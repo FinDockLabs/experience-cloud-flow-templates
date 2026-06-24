@@ -37,7 +37,7 @@ export default class AmountAndFrequency extends LightningElement {
         return this._defaultCurrency;
     }
     set defaultCurrency(value) {
-        const next = value || '';
+        const next = (value || '').toUpperCase();
         if (this._defaultCurrency === next) return;
         this._defaultCurrency = next;
         // Clear custom amount if it has more decimal places than the new currency allows.
