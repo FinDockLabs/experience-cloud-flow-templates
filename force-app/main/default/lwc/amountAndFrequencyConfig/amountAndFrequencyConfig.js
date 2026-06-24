@@ -53,10 +53,11 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     _showOneTime = true;
     _showMonthly = true;
     _defaultFrequency = 'oneTime';
-    _minAmount = 1;
+    _minAmount = 0;
     _maxAmount = 0;
     _defaultCurrencyValue = '';
     _defaultCurrencyValueType = 'String';
+    _currencyError = '';
 
     get showOneTime() {
         return this._showOneTime;
@@ -67,7 +68,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     get minAmount() {
-        return this._minAmount;
+        return this._minAmount === 0 ? '' : this._minAmount;
     }
 
     get maxAmount() {
@@ -157,10 +158,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     _sanitizePresetAmount(event) {
-        const val = this._sanitizeConfigAmountInput(event);
-        if (val === '' || val === '.') return '';
-        const num = Number(val);
-        return isNaN(num) ? '' : num;
+        return this._sanitizeConfigAmountInput(event);
     }
 
     _hydrate() {
@@ -182,7 +180,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         }
 
         this._defaultFrequency = get('defaultFrequency') ?? 'oneTime';
-        this._minAmount        = get('minAmount')        ?? 1;
+        this._minAmount        = get('minAmount')        ?? 0;
         this._maxAmount        = get('maxAmount')        ?? 0;
         const currencyVar = vars.find(x => x.name === 'defaultCurrency');
         if (currencyVar != null) {
@@ -299,6 +297,18 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         const type = event.detail.newValueDataType ?? 'String';
         const raw  = event.detail.newValue ?? '';
         const val  = type === 'String' ? raw.toUpperCase() : raw;
+
+        if (type === 'String' && val) {
+            try {
+                new Intl.NumberFormat('en-US', { style: 'currency', currency: val });
+                this._currencyError = '';
+            } catch {
+                this._currencyError = `"${val}" is not a valid ISO 4217 currency code.`;
+            }
+        } else {
+            this._currencyError = '';
+        }
+
         this._defaultCurrencyValue     = val;
         this._defaultCurrencyValueType = type;
         this._emit('defaultCurrency', val, type);
