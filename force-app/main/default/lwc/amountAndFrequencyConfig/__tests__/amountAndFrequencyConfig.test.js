@@ -17,7 +17,7 @@ function getCurrencySymbol(element) {
 }
 
 function dispatchCurrencyChange(element, newValue, newValueDataType = 'String') {
-    const flowInput = element.shadowRoot.querySelector('c-flow-variable-input');
+    const flowInput = element.shadowRoot.querySelector('cpm-flow-variable-input');
     flowInput.dispatchEvent(
         new CustomEvent('valuechange', {
             detail: { newValue, newValueDataType }
