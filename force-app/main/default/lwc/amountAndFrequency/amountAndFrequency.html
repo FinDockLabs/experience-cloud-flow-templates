@@ -82,6 +82,8 @@
                     aria-describedby={customAmountErrorId}
                     aria-invalid={hasValidationError}
                     oninput={handleCustomAmountInput}
+                    onfocus={handleCustomAmountFocus}
+                    onblur={handleCustomAmountBlur}
                 />
 
                 <template lwc:if={isCurrencySuffix}>

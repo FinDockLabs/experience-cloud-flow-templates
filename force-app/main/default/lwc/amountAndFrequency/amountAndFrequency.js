@@ -279,6 +279,20 @@ export default class AmountAndFrequency extends LightningElement {
         this._dispatchChange();
     }
 
+    handleCustomAmountFocus(event) {
+        event.target.value = this._customAmount;
+    }
+
+    handleCustomAmountBlur(event) {
+        if (this._customAmount === '') return;
+        const num = Number(this._customAmount);
+        if (isNaN(num)) return;
+        event.target.value = new Intl.NumberFormat(this._locale, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: this._currencyDecimals
+        }).format(num);
+    }
+
     _parseAmounts(raw) {
         if (!raw || !String(raw).trim()) return null;
         const parsed = String(raw)
@@ -313,8 +327,7 @@ export default class AmountAndFrequency extends LightningElement {
                 style: 'currency',
                 currency: currencyCode,
                 currencyDisplay: 'narrowSymbol',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                minimumFractionDigits: 0
             }).format(amount);
         } catch {
             return `${currencyCode} ${amount}`;

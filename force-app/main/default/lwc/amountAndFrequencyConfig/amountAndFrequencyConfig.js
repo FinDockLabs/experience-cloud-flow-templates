@@ -53,10 +53,11 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     _showOneTime = true;
     _showMonthly = true;
     _defaultFrequency = 'oneTime';
-    _minAmount = 1;
+    _minAmount = 0;
     _maxAmount = 0;
     _defaultCurrencyValue = '';
     _defaultCurrencyValueType = 'String';
+    _currencyError = '';
 
     get showOneTime() {
         return this._showOneTime;
@@ -67,7 +68,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
     get minAmount() {
-        return this._minAmount;
+        return this._minAmount === 0 ? '' : this._minAmount;
     }
 
     get maxAmount() {
@@ -128,12 +129,36 @@ export default class AmountAndFrequencyConfig extends LightningElement {
     }
 
 
+    get _currencyDecimals() {
+        const code = this._defaultCurrencyValue || CURRENCY || '';
+        try {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: code }).resolvedOptions().maximumFractionDigits;
+        } catch {
+            return 2;
+        }
+    }
+
+    _sanitizeConfigAmountInput(event) {
+        let val = event.target.value;
+        val = val.replace(',', '.');
+        val = val.replace(/[^0-9.]/g, '');
+        const firstDot = val.indexOf('.');
+        if (firstDot !== -1) {
+            val = val.substring(0, firstDot + 1) + val.substring(firstDot + 1).replace(/\./g, '');
+        }
+        const decimals = this._currencyDecimals;
+        const dotIdx = val.indexOf('.');
+        if (decimals === 0 && dotIdx !== -1) {
+            val = val.substring(0, dotIdx);
+        } else if (decimals > 0 && dotIdx !== -1 && val.length - dotIdx - 1 > decimals) {
+            val = val.substring(0, dotIdx + decimals + 1);
+        }
+        event.target.value = val;
+        return val;
+    }
+
     _sanitizePresetAmount(event) {
-        const raw = event.target.value;
-        if (raw === '') return '';
-        const num = Number(raw);
-        if (num < 0) { event.target.value = ''; return ''; }
-        return num;
+        return this._sanitizeConfigAmountInput(event);
     }
 
     _hydrate() {
@@ -155,7 +180,7 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         }
 
         this._defaultFrequency = get('defaultFrequency') ?? 'oneTime';
-        this._minAmount        = get('minAmount')        ?? 1;
+        this._minAmount        = get('minAmount')        ?? 0;
         this._maxAmount        = get('maxAmount')        ?? 0;
         const currencyVar = vars.find(x => x.name === 'defaultCurrency');
         if (currencyVar != null) {
@@ -239,17 +264,29 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         this._emit('presetAmountsRecurring', toAmountString(this._presetsRecurring));
     }
 
+    handleMinAmountInput(event) {
+        this._sanitizeConfigAmountInput(event);
+    }
+
     handleMinAmountChange(event) {
-        const raw = parseInt(event.target.value, 10);
-        const val = (isNaN(raw) || raw < 1) ? 1 : raw;
-        event.target.value = val;
-        this._minAmount = val;
-        this._emit('minAmount', val, 'Number');
+        const raw = event.target.value;
+        const parsed = parseFloat(raw);
+        if (!isNaN(parsed) && parsed > 0) {
+            this._minAmount = parsed;
+            this._emit('minAmount', parsed, 'Number');
+        } else if (raw === '') {
+            this._minAmount = 0;
+            this._emit('minAmount', 0, 'Number');
+        }
+    }
+
+    handleMaxAmountInput(event) {
+        this._sanitizeConfigAmountInput(event);
     }
 
     handleMaxAmountChange(event) {
         const raw = event.target.value;
-        const val = raw === '' ? 0 : parseInt(raw, 10);
+        const val = raw === '' ? 0 : parseFloat(raw);
         if (!isNaN(val) && val >= 0) {
             this._maxAmount = val;
             this._emit('maxAmount', val, 'Number');
@@ -260,6 +297,18 @@ export default class AmountAndFrequencyConfig extends LightningElement {
         const type = event.detail.newValueDataType ?? 'String';
         const raw  = event.detail.newValue ?? '';
         const val  = type === 'String' ? raw.toUpperCase() : raw;
+
+        if (type === 'String' && val) {
+            try {
+                new Intl.NumberFormat('en-US', { style: 'currency', currency: val });
+                this._currencyError = '';
+            } catch {
+                this._currencyError = `"${val}" is not a valid ISO 4217 currency code.`;
+            }
+        } else {
+            this._currencyError = '';
+        }
+
         this._defaultCurrencyValue     = val;
         this._defaultCurrencyValueType = type;
         this._emit('defaultCurrency', val, type);
