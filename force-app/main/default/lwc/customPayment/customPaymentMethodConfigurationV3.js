@@ -74,3 +74,84 @@ export const PAYMENT_METHOD_CONFIG_V3 = [
         ]
     }
 ];
+
+/**
+//Option 3
+class ParameterEntry {
+    String name; String value; Boolean visibleToCustomer;
+    String displayLabel; Boolean required; String dataType; String description;
+}
+RestRequest req = new RestRequest();
+RestResponse res = new RestResponse();
+RestContext.request = req;
+RestContext.response = res;
+req.requestURI = '/services/apexrest/cpm/v2/PaymentMethods';
+req.httpMethod = 'GET';
+req.headers.put('verbose', 'true');
+cpm.API_PaymentMethod_V2.getPaymentMethods();
+Map<String, Object> apiResponse = (Map<String, Object>) JSON.deserializeUntyped(res.responseBody.toString());
+List<Object> paymentMethods = (List<Object>) apiResponse.get('PaymentMethods');
+Boolean isFirstProcessor = true;
+JSONGenerator gen = JSON.createGenerator(true);
+gen.writeStartArray();
+for (Object m : paymentMethods) {
+    Map<String, Object> method = (Map<String, Object>) m;
+    List<Object> processors = (List<Object>) method.get('Processors');
+    gen.writeStartObject();
+    gen.writeStringField('name', (String) method.get('Name'));
+    gen.writeFieldName('processors');
+    gen.writeStartArray();
+    for (Object p : processors) {
+        Map<String, Object> proc = (Map<String, Object>) p;
+        Boolean supportsRecurring = (Boolean) proc.get('SupportsRecurring');
+        // Build parameters
+        List<ParameterEntry> parameters = new List<ParameterEntry>();
+        List<Object> rawParams = (List<Object>) proc.get('Parameters');
+        if (rawParams != null) {
+            for (Object raw : rawParams) {
+                Map<String, Object> rp = (Map<String, Object>) raw;
+                ParameterEntry pe = new ParameterEntry();
+                pe.name = (String) rp.get('Name');
+                pe.value = '';
+                pe.visibleToCustomer = false;
+                pe.displayLabel = (String) rp.get('Name');
+                pe.required = (Boolean) rp.get('Required');
+                pe.dataType = (String) rp.get('DataType');
+                pe.description = (String) rp.get('Description');
+                parameters.add(pe);
+            }
+        }
+        gen.writeStartObject();
+        gen.writeStringField('name', (String) proc.get('Name'));
+        gen.writeBooleanField('supportsRecurring', supportsRecurring);
+        gen.writeStringField('merchantAccount', 'TODO — check Flow CPE UI');
+        gen.writeBooleanField('enabledOneTime', true);
+        gen.writeBooleanField('enabledRecurring', supportsRecurring);
+        gen.writeBooleanField('isDefaultOneTime', isFirstProcessor);
+        gen.writeBooleanField('isDefaultRecurring', isFirstProcessor && supportsRecurring);
+        gen.writeStringField('displayLabel', (String) method.get('Name'));
+        if (!parameters.isEmpty()) {
+            gen.writeFieldName('parameters');
+            gen.writeStartArray();
+            for (ParameterEntry pe : parameters) {
+                gen.writeStartObject();
+                gen.writeStringField('name', pe.name);
+                gen.writeStringField('value', pe.value);
+                gen.writeBooleanField('visibleToCustomer', pe.visibleToCustomer);
+                gen.writeStringField('displayLabel', pe.displayLabel);
+                gen.writeBooleanField('required', pe.required);
+                gen.writeStringField('dataType', pe.dataType);
+                gen.writeStringField('description', pe.description);
+                gen.writeEndObject();
+            }
+            gen.writeEndArray();
+        }
+        gen.writeEndObject();
+        isFirstProcessor = false;
+    }
+    gen.writeEndArray();
+    gen.writeEndObject();
+}
+gen.writeEndArray();
+System.debug(gen.getAsString());
+*/
