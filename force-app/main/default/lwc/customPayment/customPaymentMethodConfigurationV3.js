@@ -1,7 +1,5 @@
 /**
- * Option 3 — API-inspired nested config format.
- *
- * Structure mirrors the API response from:
+ Structure mirrors the API response from:
  *   GET /services/apexrest/cpm/v2/PaymentMethods (with verbose=true header)
  *
  * Workflow:

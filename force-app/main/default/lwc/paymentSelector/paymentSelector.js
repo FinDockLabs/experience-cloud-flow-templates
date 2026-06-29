@@ -29,70 +29,33 @@ export default class PaymentSelector extends LightningElement {
         try {
             const input = typeof value === 'string' ? JSON.parse(value) : value;
             if (!Array.isArray(input) || input.length === 0) return null;
-            // Option 3: nested [{name, processors:[]}] — detected by processors array on first entry
-            if (Array.isArray(input[0]?.processors)) {
-                return this._enrichFromV3(input);
-            }
-            // Option 1: flat [{name, processor, merchantAccount, ...}]
-            return input.map(m => this._enrichFromV1(m));
+            return input.map(m => this._enrich(m));
         } catch (e) {
             console.error('[paymentSelector] Failed to parse config:', e);
             return null;
         }
     }
 
-    // Option 1: flat array entry → enriched selector entry
-    _enrichFromV1(m) {
+    _enrich(m) {
         return {
-            key: `${m.processor}--${m.name}`,
-            name: m.name,
-            processor: m.processor,
-            processorPrettyName: m.processorPrettyName ?? m.processor,
-            processorFriendlyName: m.processorFriendlyName ?? m.processor,
-            merchantAccount: m.merchantAccount,
+            key: `${m.paymentProcessor}--${m.paymentMethod}`,
+            name: m.paymentMethod,
+            processor: m.paymentProcessor,
+            processorPrettyName: m.paymentProcessor,
+            processorFriendlyName: m.paymentProcessor,
+            merchantAccount: m.target,
             merchantAccountGroup: 'static',
-            target: m.merchantAccount,
-            displayLabel: m.displayLabel ?? m.name,
+            target: m.target,
+            displayLabel: m.displayLabel ?? m.paymentMethod,
             redirectInstruction: m.redirectInstruction ?? '',
             enabledOneTime: m.enabledOneTime ?? false,
             enabledRecurring: m.enabledRecurring ?? false,
             isDefaultOneTime: m.isDefaultOneTime ?? false,
             isDefaultRecurring: m.isDefaultRecurring ?? false,
-            // Derived — risk: developer must not set enabledRecurring:true if PSP doesn't support it
             supportsRecurring: m.enabledRecurring ?? false,
             active: true,
             parameters: this._enrichParameters(m.parameters)
         };
-    }
-
-    // Option 3: nested [{name, processors:[]}] → flat list of enriched selector entries
-    _enrichFromV3(paymentMethods) {
-        const result = [];
-        for (const method of paymentMethods) {
-            for (const processor of (method.processors ?? [])) {
-                result.push({
-                    key: `${processor.name}--${method.name}`,
-                    name: method.name,
-                    processor: processor.name,
-                    processorPrettyName: processor.name,
-                    processorFriendlyName: processor.name,
-                    merchantAccount: processor.merchantAccount,
-                    merchantAccountGroup: 'static',
-                    target: processor.merchantAccount,
-                    displayLabel: processor.displayLabel ?? method.name,
-                    redirectInstruction: processor.redirectInstruction ?? '',
-                    enabledOneTime: processor.enabledOneTime ?? false,
-                    enabledRecurring: processor.enabledRecurring ?? false,
-                    isDefaultOneTime: processor.isDefaultOneTime ?? false,
-                    isDefaultRecurring: processor.isDefaultRecurring ?? false,
-                    // Explicit from config — safer than deriving from enabledRecurring
-                    supportsRecurring: processor.supportsRecurring ?? processor.enabledRecurring ?? false,
-                    active: true,
-                    parameters: this._enrichParameters(processor.parameters)
-                });
-            }
-        }
-        return result;
     }
 
     _enrichParameters(parameters) {
@@ -102,7 +65,7 @@ export default class PaymentSelector extends LightningElement {
             visibleToCustomer: p.visibleToCustomer ?? true,
             displayLabel: p.displayLabel ?? p.name,
             required: p.required ?? false,
-            dataType: p.dataType ?? p.data_type ?? 'String',
+            dataType: p.dataType ?? 'String',
             description: p.description ?? ''
         }));
     }

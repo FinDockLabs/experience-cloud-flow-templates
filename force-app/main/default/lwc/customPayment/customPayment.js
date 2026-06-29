@@ -1,13 +1,6 @@
 import { api, LightningElement, track, wire } from "lwc";
 import { CurrentPageReference } from "lightning/navigation";
 import { PAYMENT_METHOD_CONFIG } from "./customPaymentMethodConfiguration";
-import { PAYMENT_METHOD_CONFIG_V3 } from "./customPaymentMethodConfigurationV3";
-
-// Switch between config formats for testing and comparison:
-//   false → Option 1: flat array  [{name, processor, merchantAccount, ...}]
-//   true  → Option 3: nested array [{name, processors:[{name, supportsRecurring, ...}]}]
-// Both produce identical runtime behaviour — difference is config authoring only.
-const USE_CONFIG_V3 = false;
 
 export default class CustomPayment extends LightningElement {
     @api recordId;
@@ -24,7 +17,7 @@ export default class CustomPayment extends LightningElement {
     @wire(CurrentPageReference)
     currentPageReferenceWire;
 
-    paymentMethodConfig = USE_CONFIG_V3 ? PAYMENT_METHOD_CONFIG_V3 : PAYMENT_METHOD_CONFIG;
+    paymentMethodConfig = PAYMENT_METHOD_CONFIG;
 
     @track paymentIntent = {};
 
